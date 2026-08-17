@@ -1,0 +1,21 @@
+# Environment
+.env
+
+# Hardhat
+node_modules/
+cache/
+artifacts/
+dist/
+typechain-types/
+
+# Deployment outputs (keep deployments/ folder but ignore node-specific)
+deployments/localhost/
+deployments/hardhat/
+
+# Coverage
+coverage/
+coverage.json
+
+# Editor
+.DS_Store
+*.swp

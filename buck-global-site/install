@@ -1,0 +1,238 @@
+#!/bin/bash
+# Bucks Browser — Soul Engine
+# One-command installer
+# Usage: curl -fsSL https://bucks.global/install | bash
+
+set -e
+
+BUCKS_CID="bafybeibnpppmcznux44cazoyc7dnokpwie2d6mrybdzszjxlhacn3hc6x4"
+INSTALL_DIR="$HOME/.bucks"
+REPO_DIR="$HOME/.bucks/bucks-browser"
+
+# If this script was downloaded as part of the pinned IPFS folder (alongside
+# bucks-browser-dist.tar.gz, rather than piped in via curl|bash), prefer that
+# local copy — no network fetch needed at all.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" 2>/dev/null && pwd || echo "")"
+LOCAL_TARBALL="$SCRIPT_DIR/bucks-browser-dist.tar.gz"
+
+# A "successful" curl only means we got 200-and-some-bytes — it says nothing
+# about whether those bytes are actually the tarball. A blocked/misconfigured
+# gateway can serve an HTML error page instead, which curl happily saves and
+# `tar` then fails on with a cryptic message. Check the gzip magic bytes
+# before ever trusting a download.
+is_valid_gzip() {
+  [ -s "$1" ] || return 1
+  [ "$(head -c 2 "$1" | od -An -tx1 | tr -d ' \n')" = "1f8b" ]
+}
+
+echo ""
+echo "╔══════════════════════════════════════╗"
+echo "║        Bucks — Soul Engine           ║"
+echo "║     Web3 Browser + AI Runtime        ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
+
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
+
+# ── Detect OS ────────────────────────────────────────────────────────────────
+OS="$(uname -s)"
+case "$OS" in
+  Darwin) PLATFORM="mac" ;;
+  Linux)  PLATFORM="linux" ;;
+  *)      echo "Unsupported OS: $OS"; exit 1 ;;
+esac
+echo "Platform: $PLATFORM"
+echo ""
+
+# ── Check Node.js ─────────────────────────────────────────────────────────────
+if ! command -v node &>/dev/null; then
+  echo "Node.js not found. Installing via nvm..."
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  nvm install 20
+  nvm use 20
+fi
+NODE_VER=$(node --version)
+echo "✅ Node.js $NODE_VER"
+
+# ── Download Bucks ─────────────────────────────────────────────────────────────
+# A directory existing at $REPO_DIR isn't proof it's a good install — earlier
+# broken versions of this script could leave behind a $REPO_DIR with no
+# package.json at its own root (nested one level deeper inside a "bucks
+# browser/" subdirectory, or empty from a failed extraction), which `npm
+# install`/`npm start` would only discover much later as a confusing
+# "Missing script: start". The check below is deliberately just
+# "$REPO_DIR/package.json" — not a `find` with any depth — because that
+# broken nested layout DOES have *a* package.json a level or two down, and a
+# permissive search would wrongly call that a good install. npm/the
+# launchers all `cd "$REPO_DIR"` directly, so root is the only place a
+# package.json actually counts.
+if [ -d "$REPO_DIR" ] && [ -f "$REPO_DIR/package.json" ] && grep -q '"start"' "$REPO_DIR/package.json"; then
+  echo "✅ Bucks already installed at $REPO_DIR"
+else
+  if [ -d "$REPO_DIR" ]; then
+    echo "⚠️  Existing installation at $REPO_DIR looks broken (no package.json with a start script) — reinstalling."
+    rm -rf "$REPO_DIR"
+  fi
+  DOWNLOADED=false
+
+  if [ -f "$LOCAL_TARBALL" ]; then
+    echo "📦 Found bucks-browser-dist.tar.gz next to this script — using it (no download needed)."
+    cp "$LOCAL_TARBALL" "$INSTALL_DIR/bucks.tar.gz"
+    DOWNLOADED=true
+  fi
+
+  # Try IPFS first (if CID is set). Multiple gateways for redundancy — any
+  # single one can be down, rate-limited, or blocked on a given network.
+  # (cloudflare-ipfs.com is deliberately not in this list — that hostname no
+  # longer resolves at all.)
+  if [ "$DOWNLOADED" = false ] && [ -n "$BUCKS_CID" ]; then
+    echo "⬇️  Downloading Bucks..."
+    for GW in "https://ipfs.io/ipfs" "https://dweb.link/ipfs" "https://w3s.link/ipfs" "https://nftstorage.link/ipfs"; do
+      if curl -fsSL --max-time 120 "$GW/$BUCKS_CID/bucks-browser-dist.tar.gz" \
+           -o "$INSTALL_DIR/bucks.tar.gz" 2>/dev/null && is_valid_gzip "$INSTALL_DIR/bucks.tar.gz"; then
+        echo "✅ Downloaded from IPFS ($GW)"
+        DOWNLOADED=true
+        break
+      fi
+      echo "   ($GW didn't work, trying next...)"
+    done
+  fi
+
+  if [ "$DOWNLOADED" = false ]; then
+    echo "❌ Could not download Bucks automatically (every IPFS gateway failed or returned an unusable file)."
+    echo ""
+    echo "Manual steps:"
+    echo "  1. Fetch it yourself once a gateway is reachable, e.g.:"
+    echo "     curl -fsSL https://ipfs.io/ipfs/$BUCKS_CID/bucks-browser-dist.tar.gz -o bucks-browser-dist.tar.gz"
+    echo "  2. Run: tar -xzf bucks-browser-dist.tar.gz -C $INSTALL_DIR"
+    echo "  3. Re-run this script"
+    exit 1
+  fi
+
+  echo "📦 Extracting..."
+  mkdir -p "$REPO_DIR"
+  # Always strip the archive's top-level directory (whatever it's named) and
+  # extract straight into REPO_DIR — a plain `-C "$INSTALL_DIR"` extraction
+  # exits 0 regardless of whether the resulting tree lands where expected, so
+  # it can't be used as a success check for "did this go where we need it."
+  tar -xzf "$INSTALL_DIR/bucks.tar.gz" -C "$REPO_DIR" --strip-components=1
+  rm -f "$INSTALL_DIR/bucks.tar.gz"
+fi
+
+# Defensive: clear any quarantine flag on the extracted tree. Files created
+# by this script are never quarantined (that flag is only set by apps that
+# opt into LSQuarantine, like Safari/Mail — not curl/tar), but this is cheap
+# insurance in case a future distribution path changes that.
+if [ "$PLATFORM" = "mac" ]; then
+  xattr -rd com.apple.quarantine "$REPO_DIR" 2>/dev/null || true
+fi
+
+# ── Install dependencies ───────────────────────────────────────────────────────
+# --no-audit: recent npm versions run a vulnerability audit as part of every
+# `install` by default and print advisory text ("N vulnerabilities... run npm
+# audit fix --force / run npm audit for details") whether or not anyone acts
+# on it. That's just noise for an end-user installer — nobody running this
+# is meant to be triaging the dependency tree's CVEs — so disable the
+# automatic audit outright rather than trying to filter its output.
+echo ""
+echo "📦 Installing dependencies..."
+cd "$REPO_DIR"
+npm install --no-audit --loglevel=error 2>&1 | tail -3
+if [ -d "electron" ]; then
+  npm --prefix electron install --no-audit --loglevel=error 2>&1 | tail -3
+fi
+
+# ── Create launcher ────────────────────────────────────────────────────────────
+# No .app bundle: an unsigned .app has no reliable launch path (no Info.plist,
+# no code signature, no Apple Developer account for this project) and is the
+# wrong tool here anyway — running via `npm start` from a real terminal avoids
+# the whole Gatekeeper/code-signing question rather than fighting it.
+# Both launchers validate the app root before handing off to npm, rather than
+# assuming $HOME/.bucks/bucks-browser is correct — cheap insurance against any
+# future extraction-path regression leaving a clear error instead of npm's
+# "Missing script: start".
+cat > "$INSTALL_DIR/launch-bucks.sh" << 'LAUNCHER'
+#!/bin/bash
+APP_ROOT=$(find "$HOME/.bucks" -maxdepth 5 -name "package.json" ! -path "*/node_modules/*" \
+  -exec grep -l '"start"' {} \; 2>/dev/null | head -1 | xargs -I{} dirname {})
+if [ -z "$APP_ROOT" ]; then
+  echo "❌ Bucks installation not found. Re-run: curl -fsSL https://bucks.global/install | bash"
+  exit 1
+fi
+cd "$APP_ROOT"
+npm start
+LAUNCHER
+chmod +x "$INSTALL_DIR/launch-bucks.sh"
+
+cat > "$INSTALL_DIR/bucks" << 'BUCKSCLI'
+#!/bin/bash
+APP_ROOT=$(find "$HOME/.bucks" -maxdepth 5 -name "package.json" ! -path "*/node_modules/*" \
+  -exec grep -l '"start"' {} \; 2>/dev/null | head -1 | xargs -I{} dirname {})
+if [ -z "$APP_ROOT" ]; then
+  echo "❌ Bucks installation not found. Re-run: curl -fsSL https://bucks.global/install | bash"
+  exit 1
+fi
+cd "$APP_ROOT"
+exec npm start
+BUCKSCLI
+chmod +x "$INSTALL_DIR/bucks"
+
+# Make `bucks` available as a plain command in new shells.
+if [ "$PLATFORM" = "mac" ]; then
+  ZPROFILE="$HOME/.zprofile"
+  PATH_LINE='export PATH="$HOME/.bucks:$PATH"'
+  touch "$ZPROFILE"
+  if ! grep -qF "$PATH_LINE" "$ZPROFILE"; then
+    echo "$PATH_LINE" >> "$ZPROFILE"
+  fi
+fi
+
+# ── Done ───────────────────────────────────────────────────────────────────────
+echo ""
+echo "╔══════════════════════════════════════╗"
+echo "║         ✅ Bucks Installed!           ║"
+echo "╚══════════════════════════════════════╝"
+echo ""
+echo "To launch:"
+echo "  bash ~/.bucks/launch-bucks.sh"
+echo "  — or (after opening a new terminal) —"
+echo "  bucks"
+echo ""
+echo "Note: no .app bundle is created. Bucks runs via 'npm start', which"
+echo "avoids macOS Gatekeeper entirely rather than needing a developer account."
+echo ""
+echo "First launch:"
+echo "  • App core: ~28 MB"
+echo "  • Download AI models from the Component Store"
+echo "  • Models load based on your device specs"
+echo ""
+
+# ── Auto-launch ────────────────────────────────────────────────────────────────
+# This script is normally run as `curl ... | bash` — bash's stdin IS that same
+# pipe, already carrying the rest of this script. A bare `read` with no source
+# competes with bash's own script-buffering over that stream and can consume a
+# few bytes of the not-yet-executed remainder as if it were keyboard input —
+# the exact number of bytes eaten varies by bash build/version, which is why
+# this can surface as a seemingly-random "bash: line N: <fragment>: command
+# not found" for whatever text happened to get swallowed. Read from the
+# controlling terminal explicitly instead of stdin to avoid that entirely.
+# /dev/tty existing and being readable (-r) isn't enough — it can still fail
+# to open with "Device not configured" in a container/CI with no real
+# terminal attached at all, and under `set -e` an unguarded failed redirect
+# would abort the whole script right at the finish line. Actually try opening
+# it in a subshell first; a failing `if` condition is not itself an error
+# under `set -e`, so this is safe either way.
+if (: < /dev/tty) 2>/dev/null; then
+  read -p "Launch Bucks now? [Y/n] " -n 1 -r < /dev/tty
+  echo ""
+  if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+    echo "🚀 Launching Bucks..."
+    cd "$REPO_DIR"
+    npm start
+  fi
+else
+  echo "(non-interactive session — run 'bucks' or 'bash ~/.bucks/launch-bucks.sh' to start)"
+fi

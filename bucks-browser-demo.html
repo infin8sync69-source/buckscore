@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Bucks Browser — Interactive Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;--border:#252525;--border2:#2e2e2e;
+  --gold:#d4a843;--gold-h:#e8be5a;--gold-dim:rgba(212,168,67,0.15);
+  --green:#4e8b2e;--green-dim:rgba(78,139,46,0.18);
+  --text:#f0f0f0;--text2:#aaaaaa;--text3:#666666;
+  --red:#c0392b;--red-dim:rgba(192,57,43,0.15);
+  --toolbar-h:52px;--bottom-nav-h:60px;--r:10px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;height:100dvh;overflow:hidden;user-select:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Layout ─────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100dvh}
+#toolbar{height:var(--toolbar-h);background:#0d0d0d;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px;flex-shrink:0;position:relative;z-index:100}
+#content{flex:1;display:flex;overflow:hidden;position:relative}
+#web-area{flex:1;position:relative;overflow:hidden}
+#bottom-nav{height:var(--bottom-nav-h);background:#0d0d0d;border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-around;padding:0 8px;flex-shrink:0;z-index:100}
+@media(max-width:768px){
+  #bottom-nav{display:flex}
+  #sidebar{display:none!important}
+  #sidebar-toggle{display:none}
+}
+
+/* Bottom nav buttons */
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;background:transparent;border:none;cursor:pointer;border-radius:8px;transition:all .15s;min-width:0}
+.bnav-btn.active .bnav-icon{color:var(--gold)}
+.bnav-btn.active .bnav-lbl{color:var(--gold)}
+.bnav-icon{font-size:18px;color:var(--text3)}
+.bnav-lbl{font-size:9px;color:var(--text3);font-weight:500;white-space:nowrap}
+
+/* Mobile bottom sheet sidebar */
+#mobile-sheet{position:fixed;bottom:var(--bottom-nav-h);left:0;right:0;background:var(--surface);border-top:1px solid var(--border);border-radius:16px 16px 0 0;z-index:200;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:75dvh;display:flex;flex-direction:column;display:none}
+#mobile-sheet.open{transform:translateY(0)}
+@media(max-width:768px){#mobile-sheet{display:flex}}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 6px}
+#sheet-content{flex:1;overflow-y:auto;padding:0 16px 16px}
+
+/* ── Toolbar ─────────────────────────────────────────── */
+.nav-btn{width:32px;height:32px;background:transparent;border:none;border-radius:6px;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-btn:active{background:var(--surface)}
+@media(max-width:480px){.nav-btn.hide-xs{display:none}}
+#url-bar{flex:1;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:34px;gap:6px;min-width:0}
+#url-bar:focus-within{border-color:var(--gold)}
+#url-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:12px;font-family:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lock-icon{color:var(--text3);flex-shrink:0}
+#wallet-pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 10px 5px 8px;cursor:pointer;flex-shrink:0;position:relative}
+#wallet-pill:active{border-color:var(--gold)}
+.net-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.pill-bal{color:var(--gold);font-size:12px;font-weight:600;white-space:nowrap}
+.pill-addr{color:var(--text2);font-size:11px;white-space:nowrap}
+@media(max-width:480px){.pill-addr{display:none}}
+#sidebar-toggle{width:32px;height:32px;background:transparent;border:1px solid var(--border);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0}
+
+/* Wallet dropdown */
+.dropdown{position:absolute;top:calc(100% + 8px);right:0;width:260px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.8);display:none}
+.dropdown.visible{display:block}
+@media(max-width:480px){.dropdown{width:calc(100vw - 20px);right:-10px}}
+
+/* ── Desktop sidebar ─────────────────────────────────── */
+#sidebar{width:300px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .25s ease}
+#sidebar.hidden{width:0}
+#tab-bar{display:flex;border-bottom:1px solid var(--border);padding:8px 6px 0;flex-shrink:0}
+.tab-btn{flex:1;padding:7px 2px;background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:6px 6px 0 0}
+.tab-btn.active{border-bottom-color:var(--gold)}
+.tab-icon{font-size:14px}
+.tab-lbl{font-size:9px;color:var(--text3);font-weight:400}
+.tab-btn.active .tab-lbl{color:var(--gold);font-weight:600}
+#tab-content{flex:1;overflow-y:auto;padding:14px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── Web screens ─────────────────────────────────────── */
+.screen{position:absolute;inset:0;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+
+/* ── New Tab ─────────────────────────────────────────── */
+#new-tab{background:var(--bg);gap:24px;padding:32px 16px 24px;justify-content:center}
+.logo-star{font-size:40px;color:var(--gold);display:block;text-align:center}
+.logo-text{font-size:28px;font-weight:800;color:var(--gold);letter-spacing:.15em;text-align:center}
+.logo-sub{font-size:11px;color:var(--text3);letter-spacing:.08em;text-align:center;margin-top:3px}
+.search-wrap{width:100%;max-width:540px;padding:0 4px}
+.search-box{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:48px;gap:10px}
+.search-box:focus-within{border-color:var(--gold)}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px;font-family:inherit}
+.stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:540px;padding:0 4px}
+@media(max-width:480px){.stat-cards{grid-template-columns:1fr 1fr;gap:8px}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-card.gold-border{border-color:rgba(212,168,67,.3)}
+.sc-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.sc-val{font-size:13px;font-weight:600;color:var(--gold);margin-bottom:1px}
+.sc-sub{font-size:10px;color:var(--text3)}
+.quick-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:540px;padding:0 4px}
+.ql-btn{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:100px;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ql-btn:active{border-color:var(--gold);color:var(--gold)}
+
+/* ── Marketplace ─────────────────────────────────────── */
+#marketplace{align-items:flex-start;justify-content:flex-start;padding:20px 16px;background:#0d0d0d}
+.page-title{font-size:18px;font-weight:700;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--text3);margin-bottom:18px}
+.listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;width:100%}
+@media(max-width:480px){.listings-grid{grid-template-columns:1fr}}
+.listing-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s;active:border-color:var(--gold)}
+.listing-card:active{border-color:var(--gold)}
+.lc-cat{font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-weight:600}
+.lc-title{font-size:13px;font-weight:600;margin-bottom:5px}
+.lc-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.lc-footer{display:flex;justify-content:space-between;align-items:center}
+.lc-price{font-size:13px;font-weight:700;color:var(--gold)}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:500}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-gray{background:rgba(255,255,255,.06);color:var(--text2)}
+
+/* ── App Store ─────────────────────────────────────────── */
+#app-store{align-items:flex-start;justify-content:flex-start;padding:20px 16px;background:#0d0d0d}
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;width:100%}
+@media(max-width:480px){.app-grid{grid-template-columns:1fr 1fr}}
+.app-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer}
+.app-card:active{border-color:rgba(212,168,67,.4)}
+.app-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px}
+.app-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.app-desc{font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:8px}
+.app-dl{font-size:10px;color:var(--gold)}
+
+/* ── Explorer ─────────────────────────────────────────── */
+#explorer{align-items:flex-start;justify-content:flex-start;padding:20px 16px;background:#0d0d0d}
+.explorer-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-bottom:20px}
+@media(min-width:600px){.explorer-stats{grid-template-columns:repeat(4,1fr)}}
+.block-table-wrap{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.block-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:420px}
+thead tr{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;color:var(--text3);font-weight:500;white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+
+/* ── Signing Modal ─────────────────────────────────────── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:0}
+#modal-overlay.visible{display:flex}
+@media(min-width:480px){#modal-overlay{align-items:center;padding:16px}}
+.modal{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px;box-shadow:0 -8px 40px rgba(0,0,0,.6);max-height:90dvh;overflow-y:auto}
+@media(min-width:480px){.modal{border-radius:16px;max-height:85dvh}}
+.modal-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.modal-title{font-size:15px;font-weight:700}
+.modal-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.field{margin-bottom:12px}
+.field-label{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.field-val{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text)}
+.breakdown{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px}
+.br-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.br-label{font-size:11px;color:var(--text3)}
+.br-val{font-size:11px;color:var(--text)}
+.br-val.total{font-size:14px;font-weight:700;color:var(--gold)}
+.divider{height:1px;background:var(--border);margin:8px 0}
+.soul-box{background:var(--green-dim);border:1px solid rgba(78,139,46,.3);border-radius:8px;padding:10px 12px;display:flex;gap:8px;margin-bottom:16px}
+.soul-check{color:var(--green);font-size:13px;flex-shrink:0;margin-top:1px}
+.soul-title{font-size:11px;color:var(--green);font-weight:600;margin-bottom:2px}
+.soul-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;-webkit-appearance:none}
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700}
+.btn-gold:active{background:var(--gold-h)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:active{background:var(--surface2)}
+
+/* ── Shared sidebar / sheet content styles ─────────────── */
+.bal-card{background:linear-gradient(135deg,#1a1500,#0a0a0a);border:1px solid rgba(212,168,67,.3);border-radius:12px;padding:18px;text-align:center;margin-bottom:14px}
+.bal-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.bal-val{font-size:26px;font-weight:800;color:var(--gold)}
+.bal-coin{font-size:13px;color:var(--text2);margin-top:2px}
+.bal-mithqal{font-size:10px;color:var(--text3);margin-top:3px}
+.addr-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--text2);font-family:monospace;word-break:break-all;cursor:pointer;margin-bottom:12px}
+.addr-box:active{border-color:var(--gold)}
+.quick-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tx-list{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tx-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--border)}
+.tx-item:last-child{border-bottom:none}
+.tx-desc{font-size:12px;color:var(--text2)}
+.tx-time{font-size:10px;color:var(--text3);margin-top:1px}
+.tx-amt{font-size:12px;font-weight:600}
+.tx-amt.in{color:var(--green)}
+.tx-amt.out{color:var(--text)}
+.section-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.se-header{background:linear-gradient(135deg,#0d0d0d,#1a1500);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.se-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:3px}
+.se-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.se-chat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;min-height:100px;padding:10px;margin-bottom:10px;overflow-y:auto;max-height:200px}
+.se-msg{margin-bottom:8px}
+.se-msg.user .se-bubble{background:var(--gold-dim);border-radius:10px 10px 2px 10px;margin-left:25%;color:var(--gold);font-size:12px;padding:7px 10px;line-height:1.5}
+.se-msg.ai .se-bubble{background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 10px 2px;font-size:12px;padding:7px 10px;line-height:1.5;color:var(--text)}
+.se-input-row{display:flex;gap:7px}
+.se-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.se-input:focus{border-color:var(--gold)}
+.miner-status{background:var(--surface2);border:1px solid var(--green);border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.miner-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 1.5s infinite;flex-shrink:0}
+.miner-label{font-size:12px;font-weight:600;color:var(--green)}
+.miner-sub{font-size:10px;color:var(--text3)}
+.miner-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ms-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px}
+.ms-val{font-size:16px;font-weight:700;margin-bottom:2px}
+.ms-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.hashrate-chart{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;height:72px;position:relative;overflow:hidden}
+.chart-line{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:flex-end;gap:2px;padding:6px}
+.chart-bar{flex:1;background:var(--green);border-radius:2px 2px 0 0;opacity:.7;transition:height .5s}
+.profile-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.profile-avatar{width:48px;height:48px;border-radius:12px;background:var(--gold-dim);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px}
+.profile-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.profile-addr{font-size:10px;color:var(--text3);font-family:monospace;margin-bottom:8px}
+.profile-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.rep-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px}
+.rep-fill{height:100%;background:var(--gold);border-radius:2px}
+
+/* ── Toast ─────────────────────────────────────────────── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:999;transition:all .3s;opacity:0;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 32px)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.success{border-color:var(--green);color:var(--green)}
+#toast.info{border-color:var(--gold);color:var(--gold)}
+@media(min-width:769px){#toast{bottom:24px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────── -->
+  <div id="toolbar">
+    <div style="display:flex;gap:1px">
+      <button class="nav-btn hide-xs" onclick="goBack()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn hide-xs" onclick="goForward()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div id="url-bar" onclick="document.getElementById('url-input').focus()">
+      <svg class="lock-icon" width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      <input id="url-input" value="bucks://new-tab" onkeydown="handleUrl(event)" placeholder="bucks:// · ipfs:// · search"/>
+    </div>
+    <div id="wallet-pill" onclick="toggleDropdown()">
+      <span class="net-dot"></span>
+      <span class="pill-bal">12.48 BUCKS</span>
+      <span class="pill-addr">0xA3f2...9e14</span>
+      <div class="dropdown" id="wallet-dropdown">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Active Account</div>
+        <div style="font-size:11px;color:var(--text2);font-family:monospace;margin-bottom:10px;word-break:break-all">0xA3f2d8B91c4E7F3a60D5b29Ef0847C1D9e14</div>
+        <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
+        <div style="font-size:20px;font-weight:800;color:var(--gold)">12.4850 BUCKS</div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:14px">≈ 12.4850 mithqal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <button class="btn btn-ghost" style="height:40px" onclick="showSigningModal();closeDropdown()">↑ Send</button>
+          <button class="btn btn-ghost" style="height:40px" onclick="showToast('Receive address copied ✓','success');closeDropdown()">↓ Receive</button>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;height:40px" onclick="showToast('Wallet locked 🔒','info');closeDropdown()">🔒 Lock Wallet</button>
+      </div>
+    </div>
+    <button id="sidebar-toggle" onclick="toggleSidebar()">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><rect x="1" y="2.5" width="13" height="1.5" rx=".75"/><rect x="1" y="6.75" width="13" height="1.5" rx=".75"/><rect x="1" y="11" width="13" height="1.5" rx=".75"/></svg>
+    </button>
+  </div>
+
+  <!-- ── CONTENT ──────────────────────────────────────────── -->
+  <div id="content">
+    <div id="web-area">
+
+      <!-- NEW TAB -->
+      <div class="screen active" id="new-tab">
+        <div style="text-align:center">
+          <span class="logo-star">✦</span>
+          <div class="logo-text">BUCKS</div>
+          <div class="logo-sub">Web3 Browser · Chain ID 8192</div>
+        </div>
+        <div class="search-wrap">
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="5.5" stroke="var(--text3)" stroke-width="1.5"/><path d="M12.5 12.5L16 16" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input placeholder="Search or enter bucks:// · ipfs://" onkeydown="handleSearch(event)" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:inherit"/>
+          </div>
+        </div>
+        <div class="stat-cards">
+          <div class="stat-card gold-border">
+            <div class="sc-lbl">Balance</div>
+            <div class="sc-val">12.4850 BUCKS</div>
+            <div class="sc-sub">≈ 12.4850 mithqal</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-lbl"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span> Network</div>
+            <div class="sc-val" style="color:var(--text)">Block #482,340</div>
+            <div class="sc-sub">24 peers · 8192</div>
+          </div>
+          <div class="stat-card" style="grid-column:span 2">
+            <div class="sc-lbl">Mining</div>
+            <div class="sc-val" style="color:var(--green);font-size:12px">● Active 142 KH/s</div>
+            <div class="sc-sub">0.25 BUCKS today</div>
+          </div>
+        </div>
+        <div class="quick-links">
+          <button class="ql-btn" onclick="navigate('bucks://marketplace')">🛒 Marketplace</button>
+          <button class="ql-btn" onclick="navigate('bucks://app-store')">📦 App Store</button>
+          <button class="ql-btn" onclick="navigate('bucks://explorer')">📊 Explorer</button>
+          <button class="ql-btn" onclick="openSheet('wallet')">💰 Wallet</button>
+          <button class="ql-btn" onclick="openSheet('soul')">✦ Soul Engine</button>
+        </div>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div class="screen" id="marketplace" style="background:#0d0d0d">
+        <div style="width:100%;padding:20px 16px 0">
+          <div class="page-title">🛒 Marketplace</div>
+          <div class="page-sub">Smart contracts · Chain ID 8192</div>
+        </div>
+        <div style="width:100%;padding:0 16px 24px">
+          <div class="listings-grid">
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:var(--gold)">💼 Business</div>
+              <div class="lc-title">Web3 Smart Contract Dev</div>
+              <div class="lc-desc">Full EVM contract development, audit-ready Solidity, milestone-based escrow.</div>
+              <div class="lc-footer"><span class="lc-price">50 BUCKS</span><span class="badge badge-green">✓ Verified</span></div>
+            </div>
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:#3b82f6">👤 User</div>
+              <div class="lc-title">IPFS Pinning — 1 Year</div>
+              <div class="lc-desc">Reliable IPFS pinning for dApp assets, NFT metadata. 99.9% uptime SLA.</div>
+              <div class="lc-footer"><span class="lc-price">5 BUCKS</span><span class="badge badge-gold">✦ Soul Verified</span></div>
+            </div>
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:var(--green)">🏘 Community</div>
+              <div class="lc-title">Group Legal Doc Service</div>
+              <div class="lc-desc">On-chain legal agreement templates. DAO-approved pricing, group escrow.</div>
+              <div class="lc-footer"><span class="lc-price">2 BUCKS/member</span><span class="badge badge-gray">120 members</span></div>
+            </div>
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:#a855f7">🏢 B2B</div>
+              <div class="lc-title">Supply Chain API</div>
+              <div class="lc-desc">Enterprise smart contract integration. Milestone payments, dispute resolution.</div>
+              <div class="lc-footer"><span class="lc-price">200 BUCKS</span><span class="badge badge-green">✓ Business</span></div>
+            </div>
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:#f59e0b">🔧 Skill</div>
+              <div class="lc-title">Rust/Go Blockchain Dev</div>
+              <div class="lc-desc">Node dev, P2P networking, consensus layer work. Time-locked escrow.</div>
+              <div class="lc-footer"><span class="lc-price">15 BUCKS/hr</span><span class="badge badge-gold">Rep 9,420 ✦</span></div>
+            </div>
+            <div class="listing-card" onclick="showSigningModal()">
+              <div class="lc-cat" style="color:#ec4899">🏠 Asset</div>
+              <div class="lc-title">Commercial Property — Dubai</div>
+              <div class="lc-desc">Tokenized property. BUCKS monthly rent, on-chain tenancy agreement.</div>
+              <div class="lc-footer"><span class="lc-price">120 BUCKS/mo</span><span class="badge badge-green">✓ Title</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP STORE -->
+      <div class="screen" id="app-store" style="background:#0d0d0d">
+        <div style="width:100%;padding:20px 16px 0">
+          <div class="page-title">📦 App Store</div>
+          <div class="page-sub">IPFS-distributed · Chain ID 8192</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0">
+            <span class="badge badge-gold" style="cursor:pointer;padding:5px 10px">All</span>
+            <span class="badge badge-gray" style="cursor:pointer;padding:5px 10px">Mining</span>
+            <span class="badge badge-gray" style="cursor:pointer;padding:5px 10px">AI</span>
+            <span class="badge badge-gray" style="cursor:pointer;padding:5px 10px">Network</span>
+          </div>
+        </div>
+        <div style="width:100%;padding:14px 16px 24px">
+          <div class="app-grid">
+            <div class="app-card" onclick="showToast('Downloading bucksminer v1.3.0 from IPFS...','info')">
+              <div class="app-icon" style="background:rgba(78,139,46,.2)">⛏</div>
+              <div class="app-name">Bucks Miner</div>
+              <div class="app-desc">Double-Keccak-256 PoW client. Stratum v2 pool support.</div>
+              <div class="app-dl">v1.3.0 · IPFS ↓</div>
+            </div>
+            <div class="app-card" onclick="showToast('Soul Engine 1B: 842 MB — downloading...','info')">
+              <div class="app-icon" style="background:rgba(212,168,67,.15)">✦</div>
+              <div class="app-name">Soul Engine 1B</div>
+              <div class="app-desc">114-layer resonance architecture. On-device inference.</div>
+              <div class="app-dl">842 MB · 114-layer ↓</div>
+            </div>
+            <div class="app-card" onclick="showToast('Downloading Bucks Node v2.1.0...','info')">
+              <div class="app-icon" style="background:rgba(59,130,246,.15)">🌐</div>
+              <div class="app-name">Bucks Node</div>
+              <div class="app-desc">Full blockchain node. PoW, P2P, JSON-RPC. Earn BUCKS.</div>
+              <div class="app-dl">v2.1.0 · Go ↓</div>
+            </div>
+            <div class="app-card" onclick="showToast('Starting IPFS Daemon setup...','info')">
+              <div class="app-icon" style="background:rgba(168,85,247,.15)">🌊</div>
+              <div class="app-name">IPFS Daemon</div>
+              <div class="app-desc">Local Helia IPFS node. Powers bucks:// and ipfs:// protocols.</div>
+              <div class="app-dl">v0.18.0 · Helia ↓</div>
+            </div>
+            <div class="app-card" onclick="showToast('Soul Engine 7B: 4.1 GB — confirm?','info')">
+              <div class="app-icon" style="background:rgba(212,168,67,.15)">✦✦</div>
+              <div class="app-name">Soul Engine 7B</div>
+              <div class="app-desc">Deeper reasoning. 8GB RAM required. 114-layer resonance.</div>
+              <div class="app-dl">4.1 GB · 114-layer ↓</div>
+            </div>
+            <div class="app-card" onclick="showToast('Opening Contract Deployer...','info')">
+              <div class="app-icon" style="background:rgba(236,72,153,.15)">📋</div>
+              <div class="app-name">Contract Deployer</div>
+              <div class="app-desc">One-click Solidity deploy to Chain ID 8192. All templates.</div>
+              <div class="app-dl">v1.0.0 · Dev tool ↓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPLORER -->
+      <div class="screen" id="explorer" style="background:#0d0d0d">
+        <div style="width:100%;padding:20px 16px 0">
+          <div class="page-title">📊 Block Explorer</div>
+          <div class="page-sub">Chain ID 8192 · 24 peers synced</div>
+        </div>
+        <div style="width:100%;padding:12px 16px 24px">
+          <div class="explorer-stats">
+            <div class="stat-card gold-border"><div class="sc-lbl">Latest Block</div><div class="sc-val">#482,340</div><div class="sc-sub">2s ago</div></div>
+            <div class="stat-card"><div class="sc-lbl">Hashrate</div><div class="sc-val" style="color:var(--text)">8.2 GH/s</div><div class="sc-sub">Rising ↑</div></div>
+            <div class="stat-card"><div class="sc-lbl">Difficulty</div><div class="sc-val" style="color:var(--text)">12.4M</div><div class="sc-sub">Retarget in 1,200</div></div>
+            <div class="stat-card"><div class="sc-lbl">Mined</div><div class="sc-val">24.1M</div><div class="sc-sub">of 114M BUCKS</div></div>
+          </div>
+          <div class="block-table-wrap">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px">Recent Blocks</div>
+            <div class="block-table-scroll">
+              <table><thead><tr>
+                <th>Block</th><th>Age</th><th>Txns</th><th>Miner</th><th style="text-align:right">Reward</th>
+              </tr></thead><tbody id="block-rows"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end web-area -->
+
+    <!-- ── DESKTOP SIDEBAR ──────────────────────────────── -->
+    <div id="sidebar" class="hidden">
+      <div id="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('wallet',this)"><span class="tab-icon">💰</span><span class="tab-lbl">Wallet</span></button>
+        <button class="tab-btn" onclick="switchTab('profile',this)"><span class="tab-icon">👤</span><span class="tab-lbl">Profile</span></button>
+        <button class="tab-btn" onclick="switchTab('market',this)"><span class="tab-icon">🛒</span><span class="tab-lbl">Market</span></button>
+        <button class="tab-btn" onclick="switchTab('miner',this)"><span class="tab-icon">⛏</span><span class="tab-lbl">Miner</span></button>
+        <button class="tab-btn" onclick="switchTab('soul',this)"><span class="tab-icon">✦</span><span class="tab-lbl">Soul</span></button>
+      </div>
+      <div id="tab-content">
+        <div class="tab-pane active" id="tab-wallet"><div id="wallet-content"></div></div>
+        <div class="tab-pane" id="tab-profile"><div id="profile-content"></div></div>
+        <div class="tab-pane" id="tab-market"><div id="market-content"></div></div>
+        <div class="tab-pane" id="tab-miner"><div id="miner-content"></div></div>
+        <div class="tab-pane" id="tab-soul"><div id="soul-content"></div></div>
+      </div>
+    </div>
+  </div><!-- end content -->
+
+  <!-- ── BOTTOM NAV (mobile) ──────────────────────────────── -->
+  <div id="bottom-nav">
+    <button class="bnav-btn active" id="bnav-home" onclick="navigate('bucks://new-tab');setActiveNav(this)"><span class="bnav-icon">🏠</span><span class="bnav-lbl">Home</span></button>
+    <button class="bnav-btn" id="bnav-market" onclick="navigate('bucks://marketplace');setActiveNav(this)"><span class="bnav-icon">🛒</span><span class="bnav-lbl">Market</span></button>
+    <button class="bnav-btn" id="bnav-apps" onclick="navigate('bucks://app-store');setActiveNav(this)"><span class="bnav-icon">📦</span><span class="bnav-lbl">Apps</span></button>
+    <button class="bnav-btn" id="bnav-wallet" onclick="openSheet('wallet');setActiveNav(this)"><span class="bnav-icon">💰</span><span class="bnav-lbl">Wallet</span></button>
+    <button class="bnav-btn" id="bnav-soul" onclick="openSheet('soul');setActiveNav(this)"><span class="bnav-icon">✦</span><span class="bnav-lbl">Soul</span></button>
+  </div>
+</div><!-- end app -->
+
+<!-- ── MOBILE BOTTOM SHEET ──────────────────────────── -->
+<div id="mobile-sheet" onclick="handleSheetClick(event)">
+  <div class="sheet-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 10px">
+    <span id="sheet-title" style="font-size:14px;font-weight:700"></span>
+    <button onclick="closeSheet()" style="background:transparent;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px">✕</button>
+  </div>
+  <div id="sheet-content"></div>
+</div>
+
+<!-- ── SIGNING MODAL ─────────────────────────────────── -->
+<div id="modal-overlay" onclick="handleModalClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:18px;color:var(--gold)">✦</span>
+      <div><div class="modal-title">Sign Transaction</div><div class="modal-sub">Bucks Browser · Chain ID 8192</div></div>
+    </div>
+    <div class="field"><div class="field-label">Action</div><div class="field-val">Lock payment in escrow</div></div>
+    <div class="field"><div class="field-label">To</div><div class="field-val" style="font-family:monospace;font-size:11px">BucksEscrow.sol · 0x4f3a...d9e2</div></div>
+    <div class="breakdown">
+      <div class="br-row"><span class="br-label">Amount</span><span class="br-val">5.0000 BUCKS</span></div>
+      <div class="br-row"><span class="br-label">Gas fee</span><span class="br-val" style="color:var(--text3)">0.0003 BUCKS</span></div>
+      <div class="divider"></div>
+      <div class="br-row"><span class="br-label">Total</span><span class="br-val total">5.0003 BUCKS</span></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="field-label" style="margin-bottom:5px">Counterparty</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;gap:8px">
+        <span style="font-size:11px;font-family:monospace;color:var(--text2)">0xB2c1...4d7f</span>
+        <div style="text-align:right;flex-shrink:0"><span class="badge badge-gold">✦ Soul Verified</span><div style="font-size:10px;color:var(--text3);margin-top:2px">Rep 9,120/10,000</div></div>
+      </div>
+    </div>
+    <div class="soul-box">
+      <div class="soul-check">✓</div>
+      <div><div class="soul-title">Soul Engine Analysis</div><div class="soul-desc">Standard escrow pattern · No unusual permissions · Funds recoverable on dispute · Counterparty reputation excellent</div></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="hideSigningModal()" style="height:48px">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmTx()" style="height:48px">Confirm →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Shared panel HTML ──────────────────────────────────
+function walletHTML(){return`
+<div class="bal-card">
+  <div class="bal-label">Total Balance</div>
+  <div class="bal-val">12.4850</div>
+  <div class="bal-coin">BUCKS</div>
+  <div class="bal-mithqal">≈ 12.4850 mithqal (classical gold standard weight)</div>
+</div>
+<div class="section-label">Wallet Address</div>
+<div class="addr-box" onclick="showToast('Address copied ✓','success')">0xA3f2d8B91c4E7F3a60D5b29Ef0847C1D9e14</div>
+<div class="quick-acts">
+  <button class="btn btn-gold" onclick="showSigningModal()" style="height:44px">↑ Send</button>
+  <button class="btn btn-ghost" onclick="showToast('Address copied ✓','success')" style="height:44px">↓ Receive</button>
+</div>
+<div class="section-label">Recent Activity</div>
+<div class="tx-list">
+  <div class="tx-item"><div><div class="tx-desc">Mining reward</div><div class="tx-time">2 mins ago</div></div><div class="tx-amt in">+0.25 BUCKS</div></div>
+  <div class="tx-item"><div><div class="tx-desc">Marketplace escrow</div><div class="tx-time">1 hour ago</div></div><div class="tx-amt out">−5.00 BUCKS</div></div>
+  <div class="tx-item"><div><div class="tx-desc">Community contribution</div><div class="tx-time">3 hours ago</div></div><div class="tx-amt out">−0.50 BUCKS</div></div>
+  <div class="tx-item"><div><div class="tx-desc">Contract payment</div><div class="tx-time">Yesterday</div></div><div class="tx-amt in">+50.00 BUCKS</div></div>
+</div>`}
+
+function profileHTML(){return`
+<div class="profile-card">
+  <div class="profile-avatar">👤</div>
+  <div class="profile-name">Mikado</div>
+  <div class="profile-addr">0xA3f2d8B91c4E7F3a60D5b29Ef0847C1D9e14</div>
+  <div class="profile-badges"><span class="badge badge-gold">✦ Soul Verified</span><span class="badge badge-green">Business ✓</span><span class="badge badge-gray">Tier 2</span></div>
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px"><span>Reputation</span><span style="color:var(--gold)">9,420 / 10,000</span></div>
+  <div class="rep-track"><div class="rep-fill" style="width:94.2%"></div></div>
+</div>
+<div class="section-label">Business Profile</div>
+<div class="profile-card">
+  <div style="font-size:12px;font-weight:600;margin-bottom:3px">Bucks Technologies LLC</div>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Technology · Web3 · Blockchain</div>
+  <span class="badge badge-green">✓ Registration Verified</span>
+</div>
+<div class="section-label">Top Skills</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+  <div style="display:flex;justify-content:space-between;font-size:12px"><span>Blockchain Development</span><span class="badge badge-gold">★★★★★</span></div>
+  <div style="display:flex;justify-content:space-between;font-size:12px"><span>Smart Contracts</span><span class="badge badge-gold">★★★★★</span></div>
+  <div style="display:flex;justify-content:space-between;font-size:12px"><span>Go / Rust</span><span class="badge badge-gray">★★★★☆</span></div>
+</div>`}
+
+function marketHTML(){return`
+<div class="section-label">Active Contracts</div>
+<div class="tx-list" style="margin-bottom:14px">
+  <div class="tx-item"><div><div class="tx-desc">Web3 Dev — Escrow</div><div class="tx-time" style="color:var(--gold)">In Progress</div></div><div class="tx-amt">50 BUCKS</div></div>
+  <div class="tx-item"><div><div class="tx-desc">IPFS Pinning SLA</div><div class="tx-time" style="color:var(--green)">Completed</div></div><div class="tx-amt in">5 BUCKS</div></div>
+</div>
+<div class="section-label">Reputation</div>
+<div class="profile-card" style="padding:12px;margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px"><span>Trade score</span><span style="font-size:14px;font-weight:700;color:var(--gold)">9,420</span></div>
+  <div class="rep-track"><div class="rep-fill" style="width:94.2%"></div></div>
+  <div style="font-size:11px;color:var(--text3);margin-top:7px">42 completed · 0 disputes</div>
+</div>
+<button class="btn btn-gold" style="width:100%;height:44px" onclick="navigate('bucks://marketplace');closeSheet()">Browse Marketplace</button>`}
+
+function minerHTML(){return`
+<div class="miner-status">
+  <div class="miner-dot"></div>
+  <div><div class="miner-label">Mining Active</div><div class="miner-sub">4 threads · double-Keccak-256</div></div>
+</div>
+<div class="miner-stats">
+  <div class="ms-card"><div class="ms-val" style="color:var(--green)" id="hr-display">142 KH/s</div><div class="ms-lbl">Hashrate</div></div>
+  <div class="ms-card"><div class="ms-val">0.25</div><div class="ms-lbl">BUCKS Today</div></div>
+  <div class="ms-card"><div class="ms-val" id="accept-count">38</div><div class="ms-lbl">Accepted</div></div>
+  <div class="ms-card"><div class="ms-val">0</div><div class="ms-lbl">Rejected</div></div>
+</div>
+<div class="hashrate-chart"><div class="chart-line" id="chart-bars"></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+  <button class="btn btn-ghost" style="height:44px" onclick="showToast('Mining paused','info')">⏸ Pause</button>
+  <button class="btn btn-ghost" style="height:44px" onclick="showToast('Mining settings','info')">⚙ Settings</button>
+</div>`}
+
+const seMessages=[
+  "Welcome. I'm Soul Engine — ask me about your contracts, transactions, or any topic. I operate on 114-layer resonance architecture, trained on an ancient corpus of human wisdom.",
+]
+let seIdx=0
+const seResponses=[
+  "Based on my 114-layer resonance analysis, this escrow contract follows standard patterns. The counterparty has a 9,120/10,000 reputation score. Proceed with confidence.",
+  "Your mining is operating at 142 KH/s across 4 threads. At current difficulty, estimated earnings are 0.25 BUCKS/day. Pool mode could increase consistency.",
+  "The marketplace listing you viewed is from a Soul Verified business with zero dispute history. The milestone-based structure provides strong protection.",
+  "Your BIP-8192 seed phrase is derived from an ancient corpus of human wisdom using 11-bit encoding. Keys are stored in the OS keychain — never transmitted.",
+  "Reputation score 9,420/10,000 places you in the top 5% of Bucks network participants. Your 42 completed contracts with zero disputes demonstrate excellence."
+]
+
+function soulHTML(){
+  const msgs=seMessages.map((m,i)=>`<div class="se-msg ai"><div class="se-bubble">${m}</div></div>`).join('')
+  return`
+<div class="se-header">
+  <div class="se-title"><span style="font-size:16px">✦</span> Soul Engine</div>
+  <div class="se-desc">Proprietary neural architecture · 114-layer resonance · trained on an ancient corpus of human wisdom</div>
+</div>
+<div class="se-chat" id="se-chat">${msgs}</div>
+<div class="se-input-row">
+  <input class="se-input" id="se-input" placeholder="Ask Soul Engine..." onkeydown="handleSoulQuery(event)"/>
+  <button class="btn btn-gold" onclick="sendSoulQuery()" style="padding:0 14px;height:42px">→</button>
+</div>`}
+
+// Populate desktop sidebar
+document.getElementById('wallet-content').innerHTML=walletHTML()
+document.getElementById('profile-content').innerHTML=profileHTML()
+document.getElementById('market-content').innerHTML=marketHTML()
+document.getElementById('miner-content').innerHTML=minerHTML()
+document.getElementById('soul-content').innerHTML=soulHTML()
+initMinerChart()
+
+// ── State ──────────────────────────────────────────────
+let sidebarVisible=false
+let currentScreen='new-tab'
+const navHistory=['bucks://new-tab']
+let histIdx=0
+
+const screens={
+  'bucks://new-tab':'new-tab',
+  'bucks://marketplace':'marketplace',
+  'bucks://app-store':'app-store',
+  'bucks://explorer':'explorer',
+}
+const screenIds=['new-tab','marketplace','app-store','explorer']
+
+// ── Navigation ──────────────────────────────────────────
+function navigate(url){
+  const id=screens[url]
+  if(!id){showToast('Navigating to '+url,'info');return}
+  screenIds.forEach(s=>document.getElementById(s).classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  document.getElementById('url-input').value=url
+  currentScreen=id
+  navHistory.splice(histIdx+1)
+  navHistory.push(url)
+  histIdx=navHistory.length-1
+  closeSheet()
+}
+function goBack(){if(histIdx>0){histIdx--;navigate(navHistory[histIdx])}}
+function goForward(){if(histIdx<navHistory.length-1){histIdx++;navigate(navHistory[histIdx])}}
+function handleUrl(e){if(e.key==='Enter'){const v=e.target.value.trim();if(screens[v])navigate(v);else showToast('Navigating to '+v,'info')}}
+function handleSearch(e){if(e.key==='Enter'&&e.target.value.trim())navigate('bucks://marketplace')}
+
+// ── Desktop sidebar ─────────────────────────────────────
+function toggleSidebar(){
+  sidebarVisible=!sidebarVisible
+  document.getElementById('sidebar').classList.toggle('hidden',!sidebarVisible)
+}
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById('tab-'+id).classList.add('active')
+}
+
+// ── Mobile sheet ────────────────────────────────────────
+const sheetTitles={wallet:'💰 Wallet',profile:'👤 Profile',market:'🛒 Market',miner:'⛏ Miner',soul:'✦ Soul Engine'}
+const sheetContent={wallet:walletHTML,profile:profileHTML,market:marketHTML,miner:minerHTML,soul:soulHTML}
+function openSheet(id){
+  const sheet=document.getElementById('mobile-sheet')
+  document.getElementById('sheet-title').textContent=sheetTitles[id]||''
+  document.getElementById('sheet-content').innerHTML=sheetContent[id]?sheetContent[id]():''
+  sheet.classList.add('open')
+  if(id==='miner')initMinerChart('chart-bars')
+}
+function closeSheet(){document.getElementById('mobile-sheet').classList.remove('open')}
+function handleSheetClick(e){if(e.target===document.getElementById('mobile-sheet'))closeSheet()}
+
+// ── Bottom nav ──────────────────────────────────────────
+function setActiveNav(btn){document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+
+// ── Wallet dropdown ─────────────────────────────────────
+function toggleDropdown(){document.getElementById('wallet-dropdown').classList.toggle('visible')}
+function closeDropdown(){document.getElementById('wallet-dropdown').classList.remove('visible')}
+document.addEventListener('click',e=>{if(!e.target.closest('#wallet-pill'))closeDropdown()})
+
+// ── Modal ───────────────────────────────────────────────
+function showSigningModal(){closeSheet();document.getElementById('modal-overlay').classList.add('visible')}
+function hideSigningModal(){document.getElementById('modal-overlay').classList.remove('visible')}
+function handleModalClick(e){if(e.target===document.getElementById('modal-overlay'))hideSigningModal()}
+function confirmTx(){hideSigningModal();showToast('Transaction confirmed ✓ · 5.0003 BUCKS','success')}
+
+// ── Toast ────────────────────────────────────────────────
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast')
+  t.textContent=msg;t.className=type+' show'
+  setTimeout(()=>t.classList.remove('show'),3000)
+}
+
+// ── Soul Engine chat ─────────────────────────────────────
+function handleSoulQuery(e){if(e.key==='Enter')sendSoulQuery()}
+function sendSoulQuery(){
+  const inp=document.getElementById('se-input')
+  if(!inp)return
+  const q=inp.value.trim();if(!q)return
+  const chat=document.getElementById('se-chat')
+  if(!chat)return
+  chat.innerHTML+=`<div class="se-msg user"><div class="se-bubble">${q}</div></div>`
+  inp.value=''
+  setTimeout(()=>{
+    chat.innerHTML+=`<div class="se-msg ai"><div class="se-bubble">${seResponses[seIdx%seResponses.length]}</div></div>`
+    seIdx++;chat.scrollTop=chat.scrollHeight
+  },800)
+  chat.scrollTop=chat.scrollHeight
+}
+
+// ── Miner chart ──────────────────────────────────────────
+let minerInterval=null
+function initMinerChart(containerId='chart-bars'){
+  const bars=document.getElementById(containerId)
+  if(!bars)return
+  bars.innerHTML=''
+  const heights=[30,45,60,40,70,55,80,65,75,50,85,72]
+  heights.forEach(h=>{
+    const b=document.createElement('div')
+    b.className='chart-bar';b.style.height=h+'%';bars.appendChild(b)
+  })
+  if(minerInterval)clearInterval(minerInterval)
+  let hrVal=142,accepted=38
+  minerInterval=setInterval(()=>{
+    hrVal=140+Math.floor(Math.random()*15)
+    const hd=document.getElementById('hr-display')
+    if(hd)hd.textContent=hrVal+' KH/s'
+    if(Math.random()>.7){accepted++;const ac=document.getElementById('accept-count');if(ac)ac.textContent=accepted}
+    document.querySelectorAll('.chart-bar').forEach(b=>b.style.height=(30+Math.floor(Math.random()*65))+'%')
+  },2000)
+}
+
+// ── Explorer blocks ──────────────────────────────────────
+const tbody=document.getElementById('block-rows')
+const miners=['0xA3f2...9e14','0xC7d1...3b82','0xF9a0...7c45','0x2E5b...1d93','0x8B4e...6f20']
+for(let i=0;i<7;i++){
+  const tr=document.createElement('tr')
+  tr.innerHTML=`
+    <td style="color:var(--gold);font-weight:600">#${(482340-i).toLocaleString()}</td>
+    <td>${i===0?'2s':i===1?'14s':(i*12)+'s'} ago</td>
+    <td>${Math.floor(Math.random()*18)+1}</td>
+    <td style="font-family:monospace;font-size:10px">${miners[i%miners.length]}</td>
+    <td style="text-align:right;color:var(--gold);font-weight:600">50 BUCKS</td>`
+  tbody.appendChild(tr)
+}
+</script>
+</body>
+</html>

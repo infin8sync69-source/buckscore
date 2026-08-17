@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+
+    <title>Bucks</title>
+    <background file="welcome.html" mime-type="text/html" alignment="left" scaling="none"/>
+    <welcome    file="welcome.html"    mime-type="text/html"/>
+    <license    file="license.html"    mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+
+    <!-- Require macOS 11 Big Sur or later -->
+    <os-version min="11.0"/>
+
+    <options customize="never" require-scripts="false" rootVolumeOnly="true"/>
+
+    <choices-outline>
+        <line choice="default"/>
+    </choices-outline>
+
+    <choice id="default" title="Bucks Browser">
+        <pkg-ref id="com.bucks.browser.installer"/>
+    </choice>
+
+    <pkg-ref id="com.bucks.browser.installer"
+             version="1.0.0"
+             onConclusion="none">component.pkg</pkg-ref>
+
+</installer-gui-script>

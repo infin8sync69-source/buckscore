@@ -1,0 +1,32 @@
+{
+  "name": "bucks-contracts",
+  "version": "0.1.0",
+  "description": "EVM-compatible smart contracts for the Bucks Network (ChainID 8192)",
+  "private": true,
+  "scripts": {
+    "compile":   "hardhat compile",
+    "test":      "hardhat test",
+    "coverage":  "hardhat coverage",
+    "deploy":    "hardhat run scripts/deploy.ts --network bucks",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "node":      "hardhat node --hostname 127.0.0.1 --port 8545",
+    "clean":     "hardhat clean",
+    "lint":      "solhint 'contracts/**/*.sol'"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-ethers":  "^3.0.6",
+    "@types/chai":                       "^4.3.14",
+    "@types/mocha":                      "^10.0.6",
+    "@types/node":                       "^20.12.7",
+    "chai":                              "^4.4.1",
+    "dotenv":                            "^16.4.5",
+    "hardhat":                           "^2.22.3",
+    "solhint":                           "^5.0.1",
+    "ts-node":                           "^10.9.2",
+    "typescript":                        "^5.4.5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  }
+}

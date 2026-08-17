@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bucks-browser",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "cwd": "bucks browser",
+      "port": 8765
+    }
+  ]
+}

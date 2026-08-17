@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-firefox/
+*.local
+
+# ⚠️  CRITICAL: The BIP-8192 word list is a private proprietary asset.
+# It MUST NEVER be committed to any public repository.
+src/crypto/wordlist.ts
+src/crypto/wordlist.private.ts

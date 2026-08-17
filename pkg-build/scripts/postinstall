@@ -1,0 +1,39 @@
+#!/bin/bash
+# Bucks Browser — postinstall script
+# Runs as root; delegates real install to the logged-in user.
+
+LOG=/tmp/bucks-install.log
+
+# Detect the actual console user (not root)
+REAL_USER=$(stat -f "%Su" /dev/console 2>/dev/null || echo "$SUDO_USER")
+if [ -z "$REAL_USER" ] || [ "$REAL_USER" = "root" ]; then
+    REAL_USER=$(ls -la /dev/console | awk '{print $3}')
+fi
+REAL_HOME=$(eval echo "~$REAL_USER")
+
+echo "=== Bucks Installer ===" > "$LOG"
+echo "Date:      $(date)" >> "$LOG"
+echo "Real user: $REAL_USER" >> "$LOG"
+echo "Home:      $REAL_HOME" >> "$LOG"
+echo "" >> "$LOG"
+
+# Ensure Xcode Command Line Tools are present
+if ! xcode-select -p &>/dev/null; then
+    echo "[INFO] Xcode CLT not found — triggering install dialog..." >> "$LOG"
+    sudo -u "$REAL_USER" xcode-select --install >> "$LOG" 2>&1 || true
+    # Give the dialog a moment to appear
+    sleep 3
+fi
+
+echo "[INFO] Starting Bucks download and install..." >> "$LOG"
+echo "" >> "$LOG"
+
+# Run the real installer as the console user, in the background
+# so the macOS installer wizard can close cleanly.
+sudo -u "$REAL_USER" HOME="$REAL_HOME" bash -c \
+    'curl -fsSL https://bucks.global/install | bash' \
+    >> "$LOG" 2>&1 &
+
+echo "[INFO] Install process launched (PID $!). See $LOG for progress." >> "$LOG"
+
+exit 0

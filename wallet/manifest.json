@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Bucks Wallet",
+  "version": "0.1.0",
+  "description": "The official Bucks Blockchain browser wallet. Hold, send, and receive BUCKS. Connect to dApps.",
+  "icons": {
+    "16":  "assets/icon-16.png",
+    "48":  "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
+
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16":  "assets/icon-16.png",
+      "48":  "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    }
+  },
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["inpage.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "permissions": [
+    "storage",
+    "alarms",
+    "activeTab"
+  ],
+
+  "host_permissions": [
+    "http://127.0.0.1:8192/*",
+    "https://*.bucks.net/*"
+  ]
+}

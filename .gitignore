@@ -1,0 +1,32 @@
+# Separate git repos nested under this workspace — not tracked here
+/bucks browser/
+/bucks.global/
+
+# Deprecated / not on active path
+/_archive/
+/_v2_deferred/
+
+# Dependencies & build artifacts
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+
+# Large binaries / packaged installers
+*.tar.gz
+*.pkg
+Install Bucks.pkg
+
+# OS cruft
+.DS_Store
+
+# Unrelated opaque file, not part of this workspace's active code
+/zi24TIl4
+
+# Simulation harness run artifacts (logs, per-run data dirs)
+test/simulation/runs/
+test/simulation/tmp/
+test/simulation/**/*.log
