@@ -32,6 +32,7 @@ import {
 } from './vault';
 import type { WalletState, PublicAccount, UnsignedTx, SignedTx } from '../types';
 import { eth_getBalance, eth_getTransactionCount, eth_chainId } from '../rpc/client';
+import { bytesToHex } from '../utils/bytes';
 
 // ---------------------------------------------------------------------------
 // Initial account derivation count
@@ -323,10 +324,6 @@ function _rlpEncodeSignedTx(
   // Production: use @ethereumjs/tx for full RLP encoding.
   const encoded = JSON.stringify({ ...tx, r, s, v });
   return '0x' + Buffer.from(encoded).toString('hex');
-}
-
-function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export { getAllAddresses };

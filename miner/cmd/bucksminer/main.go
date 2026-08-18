@@ -211,8 +211,8 @@ func mineCmd() *cobra.Command {
 	cmd.Flags().StringVar(&mode,    "mode",     "",                      "Mining mode: solo|pool (overrides config)")
 	cmd.Flags().IntVar(  &threads,  "threads",  0,                       "CPU threads (0 = all cores)")
 	cmd.Flags().StringVar(&poolURL, "pool",     "",                      "Stratum pool URL (pool mode)")
-	cmd.Flags().StringVar(&nodeURL, "node",     "http://127.0.0.1:8192", "Bucks node RPC URL (solo mode)")
-	cmd.Flags().StringVar(&apiAddr, "api-addr", "127.0.0.1:8194",        "Local API bind address")
+	cmd.Flags().StringVar(&nodeURL, "node",     config.DefaultNodeRPCURL, "Bucks node RPC URL (solo mode)")
+	cmd.Flags().StringVar(&apiAddr, "api-addr", config.DefaultAPIAddr,    "Local API bind address")
 	cmd.Flags().BoolVar(  &noAPI,   "no-api",   false,                   "Disable the local HTTP API")
 
 	return cmd
@@ -252,9 +252,9 @@ func statusCmd() *cobra.Command {
 		Use:   "status",
 		Short: "Print stats from a running bucksminer daemon",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			resp, err := http.Get("http://127.0.0.1:8194/api/status")
+			resp, err := http.Get("http://" + config.DefaultAPIAddr + "/api/status")
 			if err != nil {
-				return fmt.Errorf("could not reach bucksminer API at :8194 — is it running? (%w)", err)
+				return fmt.Errorf("could not reach bucksminer API at %s — is it running? (%w)", config.DefaultAPIAddr, err)
 			}
 			defer resp.Body.Close()
 

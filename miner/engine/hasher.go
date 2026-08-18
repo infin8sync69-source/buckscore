@@ -82,6 +82,18 @@ func SealHash(headerBytes []byte, nonce uint64) Hash32 {
 	return DoubleKeccak256(SealInput(headerBytes, nonce))
 }
 
+// SealHashInto computes the same value as SealHash(buf[:headerLen], nonce),
+// but writes the nonce into a caller-owned buffer instead of allocating a
+// fresh one on every call. buf must have length headerLen+8, with
+// buf[:headerLen] already holding the header bytes (copied once by the
+// caller, outside the hot loop) — only the trailing 8 nonce bytes change
+// between calls. Used by the mining hot loop (engine/worker.go) to avoid a
+// per-hash-attempt allocation; the hash output is identical to SealHash.
+func SealHashInto(buf []byte, headerLen int, nonce uint64) Hash32 {
+	binary.BigEndian.PutUint64(buf[headerLen:], nonce)
+	return DoubleKeccak256(buf)
+}
+
 // ---------------------------------------------------------------------------
 // Target calculation
 // ---------------------------------------------------------------------------

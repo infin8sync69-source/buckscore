@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/viper"
+
+	"github.com/bucks-core/node/core/types"
 )
 
 // Config is the root configuration object for a Bucks node.
@@ -101,7 +103,7 @@ func DefaultConfig() *Config {
 		Node: NodeConfig{
 			DataDir: dataDir,
 			Network: "mainnet",
-			ChainID: 8192,
+			ChainID: types.ChainID,
 		},
 		P2P: P2PConfig{
 			ListenAddrs: []string{

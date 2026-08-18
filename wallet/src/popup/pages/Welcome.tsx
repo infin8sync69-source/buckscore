@@ -1,3 +1,5 @@
+import { CHAIN_ID } from '../../crypto/constants';
+
 interface WelcomeProps {
   onCreateWallet: () => void;
   onImportWallet: () => void;
@@ -43,7 +45,7 @@ export default function Welcome({ onCreateWallet, onImportWallet }: WelcomeProps
 
       {/* Footer hint */}
       <p style={{ fontSize: '0.75rem', color: '#5555777', marginTop: '0.5rem' }}>
-        Chain ID: 8192 · BIP-8192 seed standard
+        Chain ID: {CHAIN_ID} · BIP-8192 seed standard
       </p>
     </div>
   );

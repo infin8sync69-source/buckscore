@@ -7,6 +7,7 @@ import type { WalletState, UnsignedTx } from '../../types';
 import { bucksToGrain, eth_gasPrice, eth_getTransactionCount } from '../../rpc/client';
 import { isValidAddress } from '../../crypto/hdkey';
 import { sendToBackground } from '../hooks/useWallet';
+import { CHAIN_ID } from '../../crypto/constants';
 
 interface SendProps {
   walletState: WalletState;
@@ -44,7 +45,7 @@ export default function Send({ walletState, onBack }: SendProps) {
         gas:      '0x5208', // 21000
         gasPrice: gasPriceHex,
         nonce,
-        chainId:  8192,
+        chainId:  CHAIN_ID,
       };
 
       // Sign via background.
@@ -126,7 +127,7 @@ export default function Send({ walletState, onBack }: SendProps) {
           <Row label="To"     value={shorten(toAddr)} mono />
           <Row label="Amount" value={`${amount} BUCKS`} />
           <Row label="Gas"    value="~21,000 units" />
-          <Row label="Network" value="Bucks Mainnet · Chain 8192" />
+          <Row label="Network" value={`Bucks Mainnet · Chain ${CHAIN_ID}`} />
         </div>
 
         <p style={{ fontSize: '0.8125rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>

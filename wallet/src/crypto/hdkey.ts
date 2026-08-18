@@ -17,6 +17,7 @@
 import { HDKey } from '@scure/bip32';
 import { secp256k1 } from '@noble/curves/secp256k1';
 import { keccak_256 } from '@noble/hashes/sha3';
+import { bytesToHex } from '../utils/bytes';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -210,12 +211,6 @@ export function shortAddress(address: string, chars = 4): string {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 function numberToBytes32(n: bigint): Uint8Array {
   const hex = n.toString(16).padStart(64, '0');

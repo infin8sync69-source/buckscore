@@ -24,6 +24,8 @@ import {
 } from './wallet';
 import { isUnlocked, getActiveAddress, resetAutoLock } from './vault';
 import { rpcCall, setRpcUrl } from '../rpc/client';
+import { bytesToHex, hexToBytes } from '../utils/bytes';
+import { CHAIN_ID, CHAIN_ID_HEX } from '../crypto/constants';
 
 // ---------------------------------------------------------------------------
 // Registered dApp connections (origin → granted accounts)
@@ -149,7 +151,7 @@ async function handleMessage(
       if (!isUnlocked()) throw new Error('Please unlock your Bucks Wallet first.');
       const address = getActiveAddress();
       connectedDApps.set(origin, [address]);
-      return ok(type, id, { accounts: [address], chainId: '0x2000' });
+      return ok(type, id, { accounts: [address], chainId: CHAIN_ID_HEX });
     }
 
     case 'DAPP_DISCONNECT': {
@@ -205,10 +207,10 @@ async function handleProviderMethod(
     }
 
     case 'eth_chainId':
-      return '0x2000'; // 8192 in hex
+      return CHAIN_ID_HEX;
 
     case 'net_version':
-      return '8192';
+      return String(CHAIN_ID);
 
     case 'eth_sendTransaction': {
       if (!isUnlocked()) throw new Error('Wallet locked');
@@ -245,14 +247,3 @@ function ok(type: BucksMessage['type'], id: string, result: unknown): BucksRespo
   return { type, id, result };
 }
 
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
-  }
-  return bytes;
-}
-
-function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
-}

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../core/SoulVerified.sol";
+import "../lib/Fees.sol";
 
 /**
  * @title BucksEscrow
@@ -187,8 +188,7 @@ contract BucksEscrow is SoulVerified {
 
         e.status = EscrowStatus.Claimed;
 
-        uint256 fee    = (e.amount * FEE_BPS) / BPS_DENOMINATOR;
-        uint256 payout = e.amount - fee;
+        (uint256 fee, uint256 payout) = Fees.split(e.amount, FEE_BPS);
 
         totalFeesCollected += fee;
 

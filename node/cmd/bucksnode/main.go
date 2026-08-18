@@ -24,6 +24,7 @@ import (
 	"github.com/bucks-core/node/core/blockchain"
 	"github.com/bucks-core/node/core/consensus"
 	"github.com/bucks-core/node/core/p2p"
+	"github.com/bucks-core/node/core/types"
 )
 
 // ---------------------------------------------------------------------------
@@ -44,10 +45,10 @@ func main() {
 	root := &cobra.Command{
 		Use:   "bucksnode",
 		Short: "Bucks Blockchain full node",
-		Long: `bucksnode runs a full Bucks Blockchain node.
+		Long: fmt.Sprintf(`bucksnode runs a full Bucks Blockchain node.
 
 Native coin: BUCKS — 1 BUCKS = the classical gold standard weight (mithqal).
-Chain ID: 8192 | Consensus: Proof-of-Work (double-Keccak-256)`,
+Chain ID: %d | Consensus: Proof-of-Work (double-Keccak-256)`, types.ChainID),
 		RunE: runNode,
 	}
 
@@ -218,7 +219,7 @@ func versionCmd() *cobra.Command {
 		Short: "Print the node version",
 		Run: func(_ *cobra.Command, _ []string) {
 			fmt.Printf("Bucks Node v%s (commit %s, built %s)\n", Version, GitCommit, BuildDate)
-			fmt.Printf("Chain ID: 8192 | Coin: BUCKS | Denomination: the classical gold standard weight (mithqal)\n")
+			fmt.Printf("Chain ID: %d | Coin: BUCKS | Denomination: the classical gold standard weight (mithqal)\n", types.ChainID)
 		},
 	}
 }

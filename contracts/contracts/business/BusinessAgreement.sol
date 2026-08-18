@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../core/SoulVerified.sol";
+import "../lib/Fees.sol";
 
 /**
  * @title BusinessAgreement
@@ -381,8 +382,7 @@ contract BusinessAgreement is SoulVerified {
             require(sent, "Business: refund failed");
         } else {
             // Release to provider — with fee.
-            uint256 fee    = (m.amount * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
-            uint256 payout = m.amount - fee;
+            (uint256 fee, uint256 payout) = Fees.split(m.amount, PROTOCOL_FEE_BPS);
             totalFeesCollected += fee;
 
             (bool sent,)  = a.provider.call{value: payout}("");
@@ -499,8 +499,7 @@ contract BusinessAgreement is SoulVerified {
         m.status     = MilestoneStatus.Approved;
         m.approvedAt = block.timestamp;
 
-        uint256 fee    = (m.amount * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
-        uint256 payout = m.amount - fee;
+        (uint256 fee, uint256 payout) = Fees.split(m.amount, PROTOCOL_FEE_BPS);
         totalFeesCollected += fee;
 
         (bool sent,) = a.provider.call{value: payout}("");
