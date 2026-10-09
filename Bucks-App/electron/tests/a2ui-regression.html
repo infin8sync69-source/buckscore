@@ -1,0 +1,276 @@
+<!doctype html><meta charset="utf-8"><title>a2ui regression</title>
+<style id="harness-tokens">.hidden{display:none!important}
+:root {
+  /* ── Type ── */
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Display and UI are the same family — weight and size carry hierarchy. */
+  --font-display: var(--font-sans);
+
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.8125rem;  /* 13px */
+  --text-base: 0.875rem; /* 14px */
+  --text-lg: 1rem;       /* 16px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+
+  /* ── Spacing (4px base) ── */
+  --space-0: 0px;  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px; --space-6: 24px; --space-8: 32px;  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Chrome geometry — the header gutter, the stage inset and the dock band
+     all derive from these, so the page frame stays optically even. */
+  --chrome-gutter: 12px;        /* left/right inset of header AND stage */
+  --chrome-top: 8px;            /* above the header */
+  --chrome-gap: 6px;            /* header → stage */
+  --agent-dock-clearance: 72px; /* reserved band the native view must not cover */
+  --dock-bottom: 12px;
+
+  /* ── Top-nav rhythm ──
+     One control height and one gap for every button, the omnibox and the tab
+     chips, so the bar reads as a single row instead of several sizes that
+     happen to sit next to each other. Buttons were 32px in CSS but 28px where
+     index.html overrode them inline; the omnibox was a third height again. */
+  --ctl-h: 30px;         /* every interactive control in the top bar */
+  --ctl-gap: 4px;        /* between adjacent controls in a group */
+  --group-gap: 10px;     /* between groups (nav | omnibox | tabs | actions) */
+  --omnibox-w: 240px;    /* fixed — never changes on focus */
+
+  /* ── Radii ── */
+  --radius-control: 10px;
+  --radius-bar: 16px;    /* top nav + agent composer — the two "bars" */
+  --radius-menu: 14px;
+  --radius-panel: 18px;
+  --radius-pill: 9999px;
+  /* legacy aliases */
+  --bucks-radius-sm: 8px;  --bucks-radius-md: 12px;
+  --bucks-radius-lg: 16px; --bucks-radius-xl: 24px;
+  --bucks-radius-pill: 9999px;
+
+  /* ── Status (the only colour in the system) ── */
+  --status-online: #2ed573;
+  --status-error:  #ff4757;
+  --status-warn:   #ffb347;
+  --status-info:   #52b6ff;
+}</style>
+<div id="dashboard-window"></div>
+<div id="view-agent-search"></div>
+<pre id="out" style="font:12px ui-monospace;white-space:pre-wrap"></pre>
+<script src="../a2ui-results.js"></script>
+<script>
+// Scripted SSE in place of the network, so the engine's real code path runs
+// against a real DOM.
+let SCRIPT = [];
+window.__posted = [];
+const realFetch = window.fetch;
+window.fetch = (url, opts) => {
+  const u = String(url);
+  const isAgentRun = /\/agent$/.test(u) && opts && opts.method === 'POST';
+  if (isAgentRun) {
+    const body = SCRIPT.map(e => 'data: ' + JSON.stringify(e) + '\n').join('') + 'data: [DONE]\n';
+    const bytes = new TextEncoder().encode(body);
+    let sent = false;
+    return Promise.resolve({ ok: true, body: { getReader: () => ({
+      read: () => sent ? Promise.resolve({done:true}) : (sent = true, Promise.resolve({done:false, value: bytes})),
+    })}});
+  }
+  window.__posted.push(u);
+  return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+};
+window.showDashboardView = () => {};
+window.getActivePageContext = null;
+window.getOpenTabsContext = null;
+</script>
+<script src="../a2ui-engine.js"></script>
+<script>
+window.__results = null;
+(async () => {
+  const out = [];
+  let pass = 0, fail = 0;
+  const check = (n, ok, d) => { out.push((ok?'PASS  ':'FAIL  ')+n+(d?'  — '+d:'')); ok?pass++:fail++; };
+  const turns = () => document.getElementById('a2ui-turns');
+  const answerHtml = () => {
+    const c = turns().querySelector('.a2ui-answer-card:not(.a2ui-skeleton-shell) .a2ui-answer-text');
+    return c ? c.innerHTML : null;
+  };
+
+  // #5 — short answer, all tokens inside the skeleton's 300ms fade window
+  SCRIPT = [{type:'session',session_id:'s1'},
+            {type:'token',content:'Bitcoin is a peer-to-peer digital currency.'}];
+  window.__a2uiBindTab('t1', []);
+  await window.__a2uiRunSearch('what is bitcoin', false);
+  check('#5 short answer renders', /peer-to-peer/.test(answerHtml()||''),
+        answerHtml()===null ? 'no answer card built' : '');
+  check('#6 exactly one Next moves', turns().querySelectorAll('.a2ui-ctas').length === 1,
+        'found '+turns().querySelectorAll('.a2ui-ctas').length);
+
+  // #7 — follow-up chips must be mounted somewhere visible
+  SCRIPT = [{type:'session',session_id:'s2'},
+            {type:'token',content:'IPFS pins keep content alive.<followup>How much does pinning cost?</followup>'}];
+  window.__a2uiBindTab('t2', []);
+  await window.__a2uiRunSearch('how does ipfs pinning work', false);
+  check('#7 follow-up chips mounted', turns().querySelectorAll('.a2ui-chip').length >= 1,
+        'found '+turns().querySelectorAll('.a2ui-chip').length);
+
+  // #1 — the bug needs TWO turns: turn 1 must emit a trace step (which is what
+  // ensure() reacts to), and only then does a follow-up dereference the
+  // element it destroyed. Ordering matters — checking before a trace step has
+  // fired passes on the broken build too.
+  window.__a2uiBindTab('t9', []);
+  SCRIPT = [{type:'session',session_id:'s3a'},{type:'thinking',content:'Reading up'},
+            {type:'tool_call',name:'deep_research',label:'deep_research'},
+            {type:'token',content:'First answer.'}];
+  await window.__a2uiRunSearch('how does ipfs pinning work', false);
+  check('#1 preview element survives a trace step',
+        !!document.querySelector('.a2ui-context-card .a2ui-context-card-text'),
+        'ensure() must hide it, not remove it');
+
+  // Now the follow-up: rebuildViewHTML is skipped, so a removed element stays
+  // removed and the tool_result write dereferences null.
+  SCRIPT = [{type:'session',session_id:'s3'},{type:'thinking',content:'Looking it up'},
+            {type:'tool_result',content:'tool output here'},
+            {type:'token',content:'Pinning costs vary by provider.'}];
+  let threw = null;
+  try { await window.__a2uiRunSearch('what does it cost', true); } catch (e) { threw = e; }
+  check('#1 follow-up turn does not throw', !threw, threw ? threw.message : '');
+  const cards = turns().querySelectorAll('.a2ui-answer-card:not(.a2ui-skeleton-shell) .a2ui-answer-text');
+  const last = cards.length ? cards[cards.length-1].innerHTML : '';
+  check('#1 follow-up answer rendered', /vary by provider/.test(last||''),
+        'answer: '+String(last).slice(0,70));
+  check('#1 no raw SSE JSON in answer',
+        !/&quot;type&quot;|"type":\s*"tool_result"|tool output here/.test(last||''),
+        'answer: '+String(last).slice(0,70));
+
+  // #3 — approval-gated action must prompt, never auto-execute
+  let executed = false;
+  window.__bucksHandleAgentToolRequest = () => { executed = true; };
+  window.__bucksStashPendingAction = () => {};
+  SCRIPT = [{type:'session',session_id:'s4'},
+            {type:'browser_action',id:'r1',action_id:'a1',name:'browser_navigate',
+             args:{url:'https://example.com'},needs_approval:true,session_id:'s4',label:'Navigate'},
+            {type:'token',content:'Done.'}];
+  window.__a2uiBindTab('t3', []);
+  await window.__a2uiRunSearch('go to example.com', false);
+  const prompt = turns().querySelector('.a2ui-approve');
+  check('#3 approval prompt shown', !!prompt);
+  check('#3 not auto-executed', !executed, executed?'ran without consent':'');
+  check('#3 prompt names the tool', !!prompt && /browser_navigate/.test(prompt.textContent||''));
+  // Blocking must resolve the engine gate, not leave the turn hanging.
+  window.__posted = [];
+  if (prompt) prompt.querySelector('.a2ui-approve-no').click();
+  await new Promise(r => setTimeout(r, 60));
+  check('#3 Block resolves the gate',
+        window.__posted.some(u => /\/agent\/deny\//.test(u)) || typeof window._nxDeny === 'function',
+        'posted: '+JSON.stringify(window.__posted));
+
+  // non-gated still executes
+  executed = false;
+  SCRIPT = [{type:'session',session_id:'s5'},
+            {type:'browser_action',id:'r2',action_id:'a2',name:'browser_read_page',args:{},session_id:'s5'},
+            {type:'token',content:'Read it.'}];
+  window.__a2uiBindTab('t4', []);
+  await window.__a2uiRunSearch('read the page', false);
+  check('#3 non-gated action still runs', executed);
+
+  // #2 — history rows must not be inert
+  const hist = [{id:'c1',title:'earlier question',timestamp:'10:00',turns:[{query:'earlier question',answer:'prior answer text',followups:[]}]}];
+  localStorage.setItem('a2ui_saved_conversations', JSON.stringify(hist));
+  document.getElementById('a2ui-btn-history').click();
+  await new Promise(r => setTimeout(r, 30));
+  const row = document.querySelector('.a2ui-history-item');
+  check('#2 history row rendered', !!row);
+  if (row) {
+    row.click();
+    await new Promise(r => setTimeout(r, 60));
+    check('#2 history row restores conversation',
+          /prior answer text/.test(turns().textContent || ''),
+          'turns text: '+(turns().textContent||'').slice(0,60));
+  }
+
+  // ── Layout integrity ──────────────────────────────────────────────────
+  // Scrollport-agnostic on purpose: whichever element actually scrolls, the
+  // header must never end up painted over conversation content. That
+  // intersection IS the visual bug, so assert it geometrically rather than
+  // asserting a particular CSS mechanism.
+  const view = document.getElementById('view-agent-search');
+  // The layout assertions are only meaningful once the panel actually
+  // overflows — earlier turns in this file are short and left nothing to
+  // scroll, so the scroll checks passed vacuously. Add a long turn first.
+  const LONG = Array.from({length: 12}, (_, i) =>
+    `**Section ${i + 1}**\nThis paragraph exists to give the panel enough height to scroll, ` +
+    `so the header/content overlap assertions below are exercised against a real ` +
+    `scrolled layout rather than a panel that happens to fit.`).join('\n\n');
+  SCRIPT = [{type:'session',session_id:'sLong'},{type:'token',content: LONG}];
+  window.__a2uiBindTab('tLong', []);
+  await window.__a2uiRunSearch('a question with a long answer', false);
+
+  view.style.height = '420px';
+  await new Promise(r => setTimeout(r, 120));
+
+  const hdrEl = document.getElementById('a2ui-header-bar');
+  const candidates = [document.getElementById('a2ui-scroll'), view]
+    .filter(el => el && el.scrollHeight > el.clientHeight + 4);
+  const port = candidates[0] || view;
+  check('#lay something scrolls', candidates.length > 0,
+        'no scrollable element found');
+
+  port.scrollTop = port.scrollHeight;
+  await new Promise(r => setTimeout(r, 150));
+  check('#lay scrolled', port.scrollTop > 0, 'scrollTop=' + port.scrollTop);
+
+  const hb = hdrEl.getBoundingClientRect();
+  const pr = port.getBoundingClientRect();
+
+  // An element only bleeds through the header if the part of it that is
+  // ACTUALLY PAINTED overlaps the header. A tall answer inside a scrollport
+  // has a bounding rect spanning far past the scrollport in both directions,
+  // but everything outside the scrollport is clipped and never drawn — naive
+  // rect-vs-rect maths reports that as an overlap and fails forever.
+  const overlaps = (el) => {
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return false;
+    const visTop = Math.max(r.top, pr.top);        // clip to the scrollport
+    const visBottom = Math.min(r.bottom, pr.bottom);
+    if (visBottom <= visTop) return false;          // fully scrolled out of view
+    return visTop < hb.bottom - 1 && visBottom > hb.top + 1 &&
+           r.left < hb.right - 1 && r.right > hb.left + 1;
+  };
+
+  const content = [...document.querySelectorAll(
+    '#a2ui-turns .a2ui-user-bubble-inner, #a2ui-turns .a2ui-answer-text, #a2ui-turns .a2ui-h')];
+  const clashing = content.filter(overlaps);
+  check('#lay header never overlaps conversation content', clashing.length === 0,
+        clashing.length + ' element(s) intersect the header');
+
+  check('#lay header and columns share a left edge', (() => {
+    const t = document.getElementById('a2ui-query-title').getBoundingClientRect();
+    const l = document.getElementById('a2ui-main-layout').getBoundingClientRect();
+    return Math.abs(t.left - l.left) <= 1;
+  })(), (() => {
+    const t = document.getElementById('a2ui-query-title').getBoundingClientRect();
+    const l = document.getElementById('a2ui-main-layout').getBoundingClientRect();
+    return `title.left=${Math.round(t.left)} layout.left=${Math.round(l.left)}`;
+  })());
+
+  check('#lay header stays inside the panel',
+        hb.top >= view.getBoundingClientRect().top - 1,
+        `header.top=${Math.round(hb.top)} view.top=${Math.round(view.getBoundingClientRect().top)}`);
+
+  // Header controls must remain reachable while a run is in flight.
+  const hdr = document.getElementById('a2ui-header-bar');
+  check('#hdr header present', !!hdr);
+  check('#hdr run controls present',
+        !!document.getElementById('a2ui-btn-stop') &&
+        !!document.getElementById('a2ui-btn-new-chat') &&
+        !!document.getElementById('a2ui-btn-history') &&
+        !!document.getElementById('a2ui-viewmode'));
+
+  out.push('\n' + pass + ' passed, ' + fail + ' failed');
+  document.getElementById('out').textContent = out.join('\n');
+  window.__results = { pass, fail, lines: out };
+})().catch(e => {
+  document.getElementById('out').textContent = 'HARNESS ERROR: ' + e.message + '\n' + e.stack;
+  window.__results = { pass:0, fail:-1, lines:['HARNESS ERROR: '+e.message] };
+});
+</script>

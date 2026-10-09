@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA | Digital Assets</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+
+    :root {
+      --bg: #000000;
+      --card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #ffffff;
+      --dim: rgba(255, 255, 255, 0.6);
+      --accent: #ff3366;
+      --font: 'Space Grotesk', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      background-image: linear-gradient(180deg, rgba(255, 51, 102, 0.05) 0%, transparent 400px);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .cart-btn {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 10px 24px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .cart-btn:hover { transform: scale(1.05); }
+
+    .hero {
+      padding: 100px 0;
+      text-align: center;
+    }
+    
+    .hero h1 {
+      font-size: 80px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--dim);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      padding-bottom: 120px;
+    }
+
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s;
+    }
+
+    .product-card:hover { border-color: rgba(255, 51, 102, 0.4); }
+
+    .product-image {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      background: linear-gradient(45deg, rgba(255,255,255,0.05), transparent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    .product-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .product-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .product-category {
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+
+    .product-price {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">AURA.</div>
+      <div class="nav-links">
+        <a href="#">3D Models</a>
+        <a href="#">Textures</a>
+        <a href="#">Plugins</a>
+      </div>
+      <button class="cart-btn">Cart (0)</button>
+    </header>
+
+    <div class="hero">
+      <h1>Premium digital assets for creators.</h1>
+      <p>Elevate your next project with our curated collection of high-quality 3D models, materials, and plugins.</p>
+    </div>
+
+    <div class="products">
+      <div class="product-card">
+        <div class="product-image">🔮</div>
+        <div class="product-info">
+          <div>
+            <div class="product-category">3D Model</div>
+            <div class="product-title">Abstract Sphere</div>
+          </div>
+          <div class="product-price">$24</div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image">🧊</div>
+        <div class="product-info">
+          <div>
+            <div class="product-category">Texture</div>
+            <div class="product-title">Glass Material</div>
+          </div>
+          <div class="product-price">$12</div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image">⚡️</div>
+        <div class="product-info">
+          <div>
+            <div class="product-category">Plugin</div>
+            <div class="product-title">LightKit Pro</div>
+          </div>
+          <div class="product-price">$89</div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image">🌌</div>
+        <div class="product-info">
+          <div>
+            <div class="product-category">Environment</div>
+            <div class="product-title">Cosmic HDRI</div>
+          </div>
+          <div class="product-price">$18</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

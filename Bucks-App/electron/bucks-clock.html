@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clock — Bucks</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background: radial-gradient(58% 50% at 18% 8%, rgba(255, 255, 255, 0.18), transparent 62%),
+                radial-gradient(45% 45% at 86% 70%, rgba(255, 255, 255, 0.12), transparent 65%),
+                linear-gradient(165deg, #1f1f23 0%, #151518 55%, #0d0d10 100%);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 24px 0;
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 9px 20px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.45);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .panel { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 30px 24px; }
+  .panel.active { display: flex; }
+
+  /* Clock */
+  .clock-time {
+    font-family: 'Sora', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.5));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .clock-date {
+    font-size: 16px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+  }
+  .world-clocks {
+    margin-top: 40px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .wc-card {
+    padding: 16px 22px;
+    border-radius: 20px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.42), rgba(30,30,34,0.32));
+    border: 1px solid rgba(255,255,255,0.12);
+    text-align: center;
+    min-width: 120px;
+  }
+  .wc-city { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+  .wc-time { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; }
+  .wc-offset { font-size: 10.5px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+  /* Stopwatch */
+  .sw-display {
+    font-family: 'Sora', sans-serif;
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .sw-ms { font-size: 38px; opacity: 0.5; }
+  .laps {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 340px;
+    max-height: 180px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .lap-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+  .lap-row:first-child { color: #ffffff; font-weight: 700; }
+
+  /* Timer */
+  .timer-ring {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 28px;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring .ring-bg { stroke: rgba(255,255,255,0.08); }
+  .timer-ring .ring-fill { stroke: url(#grad); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .timer-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .timer-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .timer-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .timer-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .timer-field label { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .timer-field input {
+    width: 64px;
+    text-align: center;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    padding: 8px 4px;
+    outline: none;
+  }
+  .timer-sep { font-size: 22px; font-weight: 700; opacity: 0.3; padding-bottom: 8px; }
+
+  /* Controls */
+  .ctrl-row { display: flex; gap: 12px; margin-top: 24px; }
+  .ctrl-btn {
+    padding: 12px 28px;
+    border-radius: 16px;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .ctrl-btn:active { transform: scale(0.96); }
+  .btn-primary { background: linear-gradient(135deg, #35353d, #1b1b21); color: #fff; }
+  .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+  .btn-red { background: rgba(255,71,87,0.18); color: #ff4757; border: 1px solid rgba(255,71,87,0.25); }
+</style>
+</head>
+<body>
+<div class="tabs">
+  <button class="tab active" data-tab="clock">Clock</button>
+  <button class="tab" data-tab="stopwatch">Stopwatch</button>
+  <button class="tab" data-tab="timer">Timer</button>
+</div>
+
+<!-- CLOCK -->
+<div class="panel active" id="panel-clock">
+  <div class="clock-time" id="clock-time">00:00:00</div>
+  <div class="clock-date" id="clock-date"></div>
+  <div class="world-clocks">
+    <div class="wc-card"><div class="wc-city">New York</div><div class="wc-time" id="wc-ny">--:--</div><div class="wc-offset">UTC−5</div></div>
+    <div class="wc-card"><div class="wc-city">London</div><div class="wc-time" id="wc-lon">--:--</div><div class="wc-offset">UTC+0</div></div>
+    <div class="wc-card"><div class="wc-city">Dubai</div><div class="wc-time" id="wc-dxb">--:--</div><div class="wc-offset">UTC+4</div></div>
+    <div class="wc-card"><div class="wc-city">Tokyo</div><div class="wc-time" id="wc-tyo">--:--</div><div class="wc-offset">UTC+9</div></div>
+    <div class="wc-card"><div class="wc-city">Sydney</div><div class="wc-time" id="wc-syd">--:--</div><div class="wc-offset">UTC+11</div></div>
+  </div>
+</div>
+
+<!-- STOPWATCH -->
+<div class="panel" id="panel-stopwatch">
+  <div class="sw-display"><span id="sw-time">00:00</span><span class="sw-ms">.<span id="sw-ms">00</span></span></div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn btn-primary" id="sw-start">Start</button>
+    <button class="ctrl-btn btn-secondary" id="sw-lap" disabled>Lap</button>
+    <button class="ctrl-btn btn-red" id="sw-reset">Reset</button>
+  </div>
+  <div class="laps" id="laps"></div>
+</div>
+
+<!-- TIMER -->
+<div class="panel" id="panel-timer">
+  <div class="timer-inputs" id="timer-inputs">
+    <div class="timer-field"><label>HH</label><input type="number" id="t-h" min="0" max="99" value="0" placeholder="00"></div>
+    <div class="timer-sep">:</div>
+    <div class="timer-field"><label>MM</label><input type="number" id="t-m" min="0" max="59" value="5" placeholder="00"></div>
+    <div class="timer-sep">:</div>
+    <div class="timer-field"><label>SS</label><input type="number" id="t-s" min="0" max="59" value="0" placeholder="00"></div>
+  </div>
+  <div class="timer-ring" id="timer-ring" style="display:none">
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#ffffff"/>
+        </linearGradient>
+      </defs>
+      <circle class="ring-bg" cx="100" cy="100" r="88" fill="none" stroke-width="10"/>
+      <circle class="ring-fill" id="ring-fill" cx="100" cy="100" r="88" fill="none" stroke-width="10"
+        stroke-dasharray="553" stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-center">
+      <div class="timer-value" id="timer-value">00:00</div>
+      <div class="timer-label" id="timer-label">remaining</div>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn btn-primary" id="timer-start">Start</button>
+    <button class="ctrl-btn btn-red" id="timer-reset">Reset</button>
+  </div>
+</div>
+
+<script>
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Clock
+  function fmtWC(tz) {
+    return new Date().toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clock-time').textContent =
+      now.toLocaleTimeString('en-US', { hour12: false });
+    document.getElementById('clock-date').textContent =
+      now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('wc-ny').textContent = fmtWC('America/New_York');
+    document.getElementById('wc-lon').textContent = fmtWC('Europe/London');
+    document.getElementById('wc-dxb').textContent = fmtWC('Asia/Dubai');
+    document.getElementById('wc-tyo').textContent = fmtWC('Asia/Tokyo');
+    document.getElementById('wc-syd').textContent = fmtWC('Australia/Sydney');
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  // Stopwatch
+  let swRunning = false, swStart = 0, swElapsed = 0, swInterval = null, swLaps = [];
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function fmtSW(ms) {
+    const min = Math.floor(ms / 60000), sec = Math.floor((ms % 60000) / 1000);
+    return pad2(min) + ':' + pad2(sec);
+  }
+  function tickSW() {
+    const total = swElapsed + (Date.now() - swStart);
+    document.getElementById('sw-time').textContent = fmtSW(total);
+    document.getElementById('sw-ms').textContent = pad2(Math.floor((total % 1000) / 10));
+  }
+  document.getElementById('sw-start').addEventListener('click', () => {
+    if (!swRunning) {
+      swStart = Date.now(); swRunning = true;
+      swInterval = setInterval(tickSW, 50);
+      document.getElementById('sw-start').textContent = 'Pause';
+      document.getElementById('sw-lap').disabled = false;
+    } else {
+      swElapsed += Date.now() - swStart; clearInterval(swInterval); swRunning = false;
+      document.getElementById('sw-start').textContent = 'Resume';
+    }
+  });
+  document.getElementById('sw-lap').addEventListener('click', () => {
+    const total = swElapsed + (Date.now() - swStart);
+    swLaps.unshift({ n: swLaps.length + 1, t: total });
+    const lapsEl = document.getElementById('laps');
+    lapsEl.innerHTML = swLaps.map((l, i) =>
+      `<div class="lap-row"><span>Lap ${l.n}</span><span>${fmtSW(l.t)}.${pad2(Math.floor((l.t%1000)/10))}</span></div>`
+    ).join('');
+  });
+  document.getElementById('sw-reset').addEventListener('click', () => {
+    clearInterval(swInterval); swRunning = false; swElapsed = 0; swLaps = [];
+    document.getElementById('sw-time').textContent = '00:00';
+    document.getElementById('sw-ms').textContent = '00';
+    document.getElementById('sw-start').textContent = 'Start';
+    document.getElementById('sw-lap').disabled = true;
+    document.getElementById('laps').innerHTML = '';
+  });
+
+  // Timer
+  let timerTotal = 0, timerLeft = 0, timerRunning = false, timerInterval = null;
+  const CIRC = 553;
+  function fmtTimer(s) {
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (h) return pad2(h) + ':' + pad2(m) + ':' + pad2(sec);
+    return pad2(m) + ':' + pad2(sec);
+  }
+  function updateTimerRing() {
+    const pct = timerTotal > 0 ? timerLeft / timerTotal : 1;
+    document.getElementById('ring-fill').style.strokeDashoffset = CIRC * (1 - pct);
+    document.getElementById('timer-value').textContent = fmtTimer(timerLeft);
+  }
+  document.getElementById('timer-start').addEventListener('click', () => {
+    if (!timerRunning) {
+      if (!timerLeft) {
+        const h = parseInt(document.getElementById('t-h').value) || 0;
+        const m = parseInt(document.getElementById('t-m').value) || 0;
+        const s = parseInt(document.getElementById('t-s').value) || 0;
+        timerTotal = h*3600 + m*60 + s;
+        timerLeft = timerTotal;
+      }
+      if (!timerLeft) return;
+      document.getElementById('timer-inputs').style.display = 'none';
+      document.getElementById('timer-ring').style.display = 'block';
+      timerRunning = true;
+      document.getElementById('timer-start').textContent = 'Pause';
+      updateTimerRing();
+      timerInterval = setInterval(() => {
+        timerLeft--;
+        updateTimerRing();
+        if (timerLeft <= 0) {
+          clearInterval(timerInterval); timerRunning = false;
+          document.getElementById('timer-label').textContent = '🎉 Done!';
+          document.getElementById('timer-start').textContent = 'Start';
+        }
+      }, 1000);
+    } else {
+      clearInterval(timerInterval); timerRunning = false;
+      document.getElementById('timer-start').textContent = 'Resume';
+    }
+  });
+  document.getElementById('timer-reset').addEventListener('click', () => {
+    clearInterval(timerInterval); timerRunning = false; timerLeft = 0; timerTotal = 0;
+    document.getElementById('timer-inputs').style.display = 'flex';
+    document.getElementById('timer-ring').style.display = 'none';
+    document.getElementById('timer-start').textContent = 'Start';
+    document.getElementById('timer-label').textContent = 'remaining';
+    document.getElementById('ring-fill').style.strokeDashoffset = 0;
+  });
+</script>
+</body>
+</html>

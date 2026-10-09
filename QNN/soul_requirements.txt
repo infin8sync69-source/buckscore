@@ -1,0 +1,34 @@
+# Soul of the World — Swarm Requirements
+# Install: pip install -r soul_requirements.txt --break-system-packages
+
+# ── Core retrieval ────────────────────────────────────────────────────────────
+sentence-transformers>=2.7.0    # BGE-M3 encoder
+faiss-cpu>=1.8.0                # FAISS IVF index (existing)
+numpy>=1.26.0
+
+# ── BM25 keyword strategy ─────────────────────────────────────────────────────
+bm25s>=0.1.10                   # Real BM25Okapi — replaces manual inverted index
+
+# ── Qdrant HNSW vector store ──────────────────────────────────────────────────
+qdrant-client>=1.9.0            # HNSW index; run --use-qdrant to activate
+
+# ── Networking (Ollama calls) ─────────────────────────────────────────────────
+requests>=2.31.0
+
+# ── Optional: DSPy prompt optimizer ──────────────────────────────────────────
+# Compiles Ollama prompts against example Q&A pairs. CPU-only, no GPU needed.
+# Run once: python soul_dspy_optimizer.py --compile
+dspy-ai>=3.0.0
+
+# ── Optional: CrewAI (future multi-agent orchestration) ──────────────────────
+# Not used in current swarm — evaluated and deferred (requires LLM API credentials).
+# crewai>=1.15.0
+
+# ── Optional: Haystack (future hybrid search pipeline) ───────────────────────
+# Powerful production RAG framework but substantial refactor needed.
+# haystack-ai>=3.0.0
+
+# ── Phase F — GPU only (note for future hardware) ────────────────────────────
+# unsloth    — fast LoRA fine-tuning on collected interaction data (needs CUDA GPU)
+# vllm       — faster inference than Ollama (needs CUDA GPU)
+# ray        — proper distributed multi-node swarm execution (needs cluster)

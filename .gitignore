@@ -30,3 +30,14 @@ Install Bucks.pkg
 test/simulation/runs/
 test/simulation/tmp/
 test/simulation/**/*.log
+
+# More separate git repos / worktrees nested under this workspace — not tracked here
+/bucks 3/
+/Bucks Blockchain/
+/bucks-android-wt/
+
+# Packaged Electron builds (files >100MB, rejected by GitHub)
+Bucks-App/electron/dist/
+
+# Real cluster secret + bootstrap multiaddr (public repo) — keep the .example only
+Bucks-App/ipfs/cluster-config.env

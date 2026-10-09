@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>A2UI live — real engine</title>
+<link rel="stylesheet" href="../electron/styles.css?v=1786692757">
+<link rel="stylesheet" href="../electron/bucks-brand.css?v=1786692757">
+<link rel="stylesheet" href="../electron/a2ui-results.css?v=1786692757">
+<style>
+  body { margin:0; background:var(--bg-body); color:var(--text-primary);
+         font-family:'Instrument Sans',system-ui,sans-serif; }
+  #bar { display:flex; gap:8px; padding:10px 14px; align-items:center;
+         border-bottom:1px solid var(--border-subtle); }
+  #bar input { flex:1; padding:7px 12px; border-radius:8px; font:inherit;
+               background:var(--input-bg); color:var(--text-primary);
+               border:1px solid var(--input-border); }
+  #bar button { padding:7px 14px; border-radius:8px; font:inherit; cursor:pointer;
+                background:var(--accent); color:var(--accent-contrast); border:0; }
+  .dashboard-view { padding:0; }
+</style>
+<body data-theme="dark">
+
+<div id="bar">
+  <span id="brand"></span>
+  <input id="q" value="what is chiplet?" aria-label="Query">
+  <button id="go">Search</button>
+  <button id="theme" style="background:var(--input-bg);color:var(--text-primary);border:1px solid var(--border-subtle)">theme</button>
+</div>
+
+<!-- The engine expects these host nodes to exist. -->
+<div id="dashboard-window">
+  <div id="view-agent-search" class="dashboard-view"></div>
+</div>
+
+<script src="../electron/bucks-brand.js?v=1786692757"></script>
+<script src="../electron/a2ui-results.js?v=1786692757"></script>
+<script src="../electron/a2ui-engine.js?v=1786692757"></script>
+<script>
+  // Stand-ins for the renderer.js integration points the engine calls out to.
+  window.__a2uiOpenTab = (u) => { console.log('[openTab]', u); window.__lastTab = u; };
+  window.showDashboardView = () => {};
+  window.getOpenTabsContext = () => 'Tab 1: Loading… (https://youtube.com)\nTab 2: New Tab (bucks://newtab)';
+
+  document.getElementById('brand').innerHTML =
+    BucksBrand.html({ context: 'live', size: 'sm' });
+  document.getElementById('go').onclick = () =>
+    window.__a2uiRunSearch(document.getElementById('q').value, false);
+  document.getElementById('theme').onclick = () =>
+    document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+</script>
+</body>

@@ -1,0 +1,118 @@
+{
+  "name": "bucks-browser",
+  "version": "1.1.0",
+  "description": "Bucks Web3 Browser",
+  "main": "main.js",
+  "author": "Bucks Developer",
+  "scripts": {
+    "start": "npx electron .",
+    "test": "playwright test tests/",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir",
+    "preview": "electron-builder --dir"
+  },
+  "dependencies": {
+    "@chainsafe/libp2p-gossipsub": "14.1.2",
+    "@chainsafe/libp2p-noise": "16.1.4",
+    "@chainsafe/libp2p-yamux": "7.0.4",
+    "@helia/block-brokers": "4.2.4",
+    "@helia/unixfs": "4.0.3",
+    "@libp2p/bootstrap": "11.0.47",
+    "@libp2p/crypto": "5.1.8",
+    "@libp2p/identify": "3.0.20",
+    "@libp2p/mdns": "11.0.47",
+    "@libp2p/mplex": "11.0.47",
+    "@libp2p/peer-id": "5.1.9",
+    "@libp2p/tcp": "10.1.0",
+    "@libp2p/utils": "6.7.2",
+    "@libp2p/websockets": "9.2.19",
+    "@multiformats/multiaddr": "12.5.1",
+    "@noble/post-quantum": "^0.6.1",
+    "blockstore-fs": "2.0.5",
+    "datastore-fs": "11.0.0",
+    "electron-serve": "^3.0.1",
+    "helia": "5.5.1",
+    "leaflet": "^1.9.4",
+    "libp2p": "2.10.0",
+    "multiformats": "13.4.2",
+    "node-llama-cpp": "^3.19.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "electron": "^42.4.1",
+    "electron-builder": "^24.13.3",
+    "playwright": "^1.61.1"
+  },
+  "build": {
+    "appId": "com.bucks.browser",
+    "productName": "Bucks",
+    "publish": null,
+    "asar": false,
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "brand/dist/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "brand/dist/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "brand/dist/icon.png",
+      "category": "Network"
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Bucks"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "*.js",
+      "*.html",
+      "*.css",
+      "*.png",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../agent",
+        "to": "agent",
+        "filter": [
+          "**/*",
+          "!.venv/**",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/*.log",
+          "!data/**",
+          "!memory/**",
+          "!examples/**",
+          "!.pytest_cache/**",
+          "!.env",
+          "!.env.local",
+          "!**/.env",
+          "!**/.env.local"
+        ]
+      }
+    ]
+  },
+  "allowScripts": {
+    "electron@28.3.3": true,
+    "fsevents@2.3.3": true,
+    "node-datachannel@0.29.0": true,
+    "node-llama-cpp@3.19.0": true
+  }
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimalist | Thoughts on Design</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Work+Sans:wght@400;600&display=swap');
+
+    :root {
+      --bg: #fdfbf7;
+      --text: #2c2a26;
+      --dim: #7a756b;
+      --accent: #d9534f;
+      --serif: 'Lora', serif;
+      --sans: 'Work Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      line-height: 1.8;
+      font-size: 19px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    header {
+      margin-bottom: 80px;
+      text-align: center;
+    }
+
+    .logo {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 24px;
+    }
+
+    article {
+      margin-bottom: 60px;
+    }
+
+    h1 {
+      font-size: 42px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .meta {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--dim);
+      margin-bottom: 40px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .tag {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 24px;
+    }
+    
+    .dropcap {
+      float: left;
+      font-size: 80px;
+      line-height: 60px;
+      padding-top: 4px;
+      padding-right: 12px;
+      padding-left: 3px;
+      font-weight: 600;
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 24px;
+      margin: 40px 0;
+      font-style: italic;
+      font-size: 24px;
+      color: var(--dim);
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      margin: 60px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">The Journal</div>
+    </header>
+
+    <article>
+      <h1>The Art of Restraint in UI Design</h1>
+      <div class="meta">
+        <span class="tag">Design</span>
+        <span>October 12, 2026</span>
+        <span>5 min read</span>
+      </div>
+      
+      <p><span class="dropcap">I</span>n an era where screen real estate is infinite and computational power allows for boundless animations, the true challenge of a designer is no longer what to add, but what to omit.</p>
+      
+      <p>Minimalism is frequently misunderstood as merely a lack of elements. But genuine restraint requires a deep understanding of the user's intent. When we strip away the extraneous, we don't just create empty space; we elevate the content that remains. The whitespace becomes a framing device, guiding the eye and allowing the mind to process information without cognitive overload.</p>
+      
+      <blockquote>"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."</blockquote>
+      
+      <p>Consider the typical software interface today—cluttered with features that 80% of users will never touch. By hiding these secondary actions and embracing contextual menus or progressive disclosure, we respect the user's focus.</p>
+    </article>
+    
+    <hr>
+    
+    <article>
+      <h1>Typography as Architecture</h1>
+      <div class="meta">
+        <span class="tag">Typography</span>
+        <span>September 28, 2026</span>
+        <span>4 min read</span>
+      </div>
+      
+      <p>Before color, before imagery, before layout grids—there is type. The structural integrity of any design relies fundamentally on its typographic foundation. Good typography is invisible to the layperson but deeply felt.</p>
+    </article>
+  </div>
+</body>
+</html>

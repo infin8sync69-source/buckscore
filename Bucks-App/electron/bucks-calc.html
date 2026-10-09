@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator — Bucks</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background: radial-gradient(58% 50% at 18% 8%, rgba(255, 255, 255, 0.18), transparent 62%),
+                radial-gradient(45% 45% at 86% 70%, rgba(255, 255, 255, 0.12), transparent 65%),
+                linear-gradient(165deg, #1f1f23 0%, #151518 55%, #0d0d10 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .calc {
+    width: 340px;
+    border-radius: 32px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.52), rgba(30,30,34,0.42));
+    backdrop-filter: blur(42px);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
+    overflow: hidden;
+  }
+  .display {
+    padding: 28px 24px 20px;
+    background: rgba(0,0,0,0.18);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: right;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .display .expr {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    min-height: 18px;
+    word-break: break-all;
+  }
+  .display .result {
+    font-family: 'Sora', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    word-break: break-all;
+    line-height: 1;
+    transition: font-size 0.15s;
+  }
+  .display .result.small { font-size: 28px; }
+  .btns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+  .btn {
+    padding: 0;
+    height: 70px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(30,30,34,0.5);
+    transition: background 0.12s, transform 0.08s;
+    user-select: none;
+  }
+  .btn:hover { background: rgba(255,255,255,0.1); }
+  .btn:active { background: rgba(255,255,255,0.18); transform: scale(0.96); }
+  .btn.op { color: #f7931a; }
+  .btn.fn { color: rgba(255,255,255,0.65); font-size: 15px; }
+  .btn.eq {
+    background: linear-gradient(135deg, #35353d, #1b1b21);
+    color: #fff;
+    font-size: 24px;
+  }
+  .btn.eq:hover { background: linear-gradient(135deg, #8f52f0, #bc8fff); }
+  .btn.zero { grid-column: span 2; }
+  .btn.ac { color: #ff4757; }
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="display">
+    <div class="expr" id="expr"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="btns">
+    <button class="btn fn ac" data-action="clear">AC</button>
+    <button class="btn fn" data-action="sign">+/−</button>
+    <button class="btn fn" data-action="pct">%</button>
+    <button class="btn op" data-action="op" data-op="÷">÷</button>
+
+    <button class="btn" data-action="num" data-val="7">7</button>
+    <button class="btn" data-action="num" data-val="8">8</button>
+    <button class="btn" data-action="num" data-val="9">9</button>
+    <button class="btn op" data-action="op" data-op="×">×</button>
+
+    <button class="btn" data-action="num" data-val="4">4</button>
+    <button class="btn" data-action="num" data-val="5">5</button>
+    <button class="btn" data-action="num" data-val="6">6</button>
+    <button class="btn op" data-action="op" data-op="−">−</button>
+
+    <button class="btn" data-action="num" data-val="1">1</button>
+    <button class="btn" data-action="num" data-val="2">2</button>
+    <button class="btn" data-action="num" data-val="3">3</button>
+    <button class="btn op" data-action="op" data-op="+">+</button>
+
+    <button class="btn zero" data-action="num" data-val="0">0</button>
+    <button class="btn" data-action="dot">.</button>
+    <button class="btn eq" data-action="equals">=</button>
+  </div>
+</div>
+<script>
+  let current = '0', prev = '', op = '', justEvaled = false;
+  const resultEl = document.getElementById('result');
+  const exprEl = document.getElementById('expr');
+
+  function update() {
+    resultEl.textContent = current;
+    resultEl.className = 'result' + (current.length > 9 ? ' small' : '');
+  }
+
+  function compute() {
+    let a = parseFloat(prev), b = parseFloat(current);
+    if (isNaN(a) || isNaN(b)) return current;
+    switch (op) {
+      case '+': return String(+(a + b).toPrecision(12));
+      case '−': return String(+(a - b).toPrecision(12));
+      case '×': return String(+(a * b).toPrecision(12));
+      case '÷': return b === 0 ? 'Error' : String(+(a / b).toPrecision(12));
+    }
+    return current;
+  }
+
+  document.querySelector('.btns').addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    const { action, val, op: bop } = btn.dataset;
+
+    if (action === 'clear') { current = '0'; prev = ''; op = ''; exprEl.textContent = ''; }
+    else if (action === 'num') {
+      if (justEvaled) { current = val; justEvaled = false; }
+      else current = current === '0' ? val : (current.length < 12 ? current + val : current);
+    }
+    else if (action === 'dot') {
+      if (justEvaled) { current = '0.'; justEvaled = false; }
+      else if (!current.includes('.')) current += '.';
+    }
+    else if (action === 'sign') { current = String(-parseFloat(current) || 0); }
+    else if (action === 'pct') { current = String(parseFloat(current) / 100); }
+    else if (action === 'op') {
+      if (op && prev && !justEvaled) { current = compute(); prev = ''; }
+      prev = current; op = bop; justEvaled = false; current = '0';
+      exprEl.textContent = prev + ' ' + op;
+    }
+    else if (action === 'equals') {
+      if (!op) return;
+      exprEl.textContent = prev + ' ' + op + ' ' + current + ' =';
+      current = compute(); prev = ''; op = ''; justEvaled = true;
+    }
+    update();
+  });
+  update();
+</script>
+</body>
+</html>

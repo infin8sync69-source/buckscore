@@ -1,0 +1,27 @@
+app = "soul-engine-api"
+primary_region = "sin"  # Singapore — closest to UAE/India
+
+[build]
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false   # Keep warm — model cold start is ~30s
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 2
+  memory_mb = 2048             # BGE-M3 needs ~1.5GB RAM
+
+[checks]
+  [checks.health]
+    grace_period = "60s"       # Allow 60s for model load on first boot
+    interval = "30s"
+    method = "GET"
+    path = "/health"
+    timeout = "10s"

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina | Next-Gen Productivity</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --dim: #64748b;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary: #f1f5f9;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--primary);
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      margin: 0 16px;
+      font-size: 15px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 99px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+
+    .hero {
+      text-align: center;
+      padding: 120px 0 80px;
+    }
+
+    .pill {
+      display: inline-block;
+      background: var(--secondary);
+      color: var(--primary);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--dim);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .hero-img {
+      width: 100%;
+      max-width: 900px;
+      height: 500px;
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      border-radius: 24px;
+      margin: 0 auto;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .hero-img::after {
+      content: 'App Interface Mockup';
+      color: var(--dim);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <div class="logo">Lumina.</div>
+      <div class="nav-links">
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+        <a href="#">Company</a>
+      </div>
+      <a href="#" class="btn">Get Started Free</a>
+    </nav>
+
+    <div class="hero">
+      <div class="pill">✨ Lumina AI v2.0 is now live</div>
+      <h1>Work smarter, not harder with AI-driven insights.</h1>
+      <p>Lumina analyzes your team's workflow and automates the mundane, freeing you up to focus on what truly matters.</p>
+      <a href="#" class="btn" style="padding: 16px 32px; font-size: 16px;">Start Your 14-Day Trial</a>
+    </div>
+    
+    <div class="hero-img"></div>
+  </div>
+</body>
+</html>

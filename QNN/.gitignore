@@ -1,0 +1,20 @@
+# Secrets — never commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Data / model artefacts
+*.npy
+*.faiss
+qdrant_data/
+
+# Logs
+*.jsonl
+soul_interactions.jsonl

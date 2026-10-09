@@ -1,0 +1,9 @@
+{
+  "name": "bucks-app",
+  "version": "1.1.0",
+  "description": "Bucks Production Ready Application",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "node launch.js"
+  }
+}

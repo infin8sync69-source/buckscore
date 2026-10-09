@@ -1,0 +1,14 @@
+{
+  "retrieval_k": 5,
+  "ollama_temperature": 0.7,
+  "quality_threshold": 0.25,
+  "strategy_weights": {
+    "dense": 0.3726,
+    "pheromone": 0.2235,
+    "layer": 0.1118,
+    "keyword": 0.2921
+  },
+  "adaptation_rate": 0.1,
+  "total_queries": 12,
+  "rolling_avg_quality": 0.5386
+}

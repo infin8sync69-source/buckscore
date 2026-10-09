@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Converter — Bucks</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background: radial-gradient(58% 50% at 18% 8%, rgba(255, 255, 255, 0.18), transparent 62%),
+                radial-gradient(45% 45% at 86% 70%, rgba(255, 255, 255, 0.12), transparent 65%),
+                linear-gradient(165deg, #1f1f23 0%, #151518 55%, #0d0d10 100%);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 20px 24px 0;
+    flex-shrink: 0;
+  }
+  header h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+  .cat-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .cat-btn {
+    padding: 7px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cat-btn.active {
+    background: linear-gradient(135deg, #35353d, #1b1b21);
+    color: #fff;
+    border-color: transparent;
+  }
+  .main {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 480px;
+    width: 100%;
+    align-self: center;
+  }
+  .conv-card {
+    border-radius: 24px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.42), rgba(30,30,34,0.32));
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .field-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+  .field-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+  }
+  .field-input {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    padding: 12px 14px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: rgba(255, 255, 255, 0.5); }
+  .field-select {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    width: 100%;
+    appearance: none;
+    cursor: pointer;
+  }
+  .swap-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 2px;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .swap-btn:hover { background: rgba(255,255,255,0.14); }
+  .swap-btn:active { transform: rotate(180deg); }
+  .result-display {
+    text-align: center;
+    padding: 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+  .result-val {
+    font-family: 'Sora', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 30%, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    word-break: break-all;
+  }
+  .result-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .quick-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .quick-btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.65);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Converter</h1>
+  <div class="cat-tabs">
+    <button class="cat-btn active" data-cat="length">Length</button>
+    <button class="cat-btn" data-cat="weight">Weight</button>
+    <button class="cat-btn" data-cat="temp">Temperature</button>
+    <button class="cat-btn" data-cat="area">Area</button>
+    <button class="cat-btn" data-cat="volume">Volume</button>
+    <button class="cat-btn" data-cat="speed">Speed</button>
+    <button class="cat-btn" data-cat="data">Data</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="conv-card">
+    <div class="field-row">
+      <div class="field-group">
+        <div class="field-label">From</div>
+        <input class="field-input" type="number" id="val-from" value="1" step="any">
+        <select class="field-select" id="unit-from"></select>
+      </div>
+      <button class="swap-btn" id="swap-btn" title="Swap units">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+      </button>
+      <div class="field-group">
+        <div class="field-label">To</div>
+        <input class="field-input" type="number" id="val-to" value="" step="any" readonly style="color:rgba(255,255,255,0.6);">
+        <select class="field-select" id="unit-to"></select>
+      </div>
+    </div>
+    <div class="result-display">
+      <div class="result-val" id="result-val">—</div>
+      <div class="result-label" id="result-label">Result</div>
+    </div>
+    <div class="quick-row" id="quick-row"></div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  length: {
+    label: 'Length',
+    units: { m:1, km:1e3, cm:0.01, mm:0.001, mi:1609.344, yd:0.9144, ft:0.3048, in:0.0254, nm:1852 },
+    names: { m:'Meter', km:'Kilometer', cm:'Centimeter', mm:'Millimeter', mi:'Mile', yd:'Yard', ft:'Foot', in:'Inch', nm:'Nautical Mile' },
+    quick: [1,10,100,1000]
+  },
+  weight: {
+    units: { kg:1, g:0.001, mg:1e-6, lb:0.453592, oz:0.0283495, t:1000, st:6.35029 },
+    names: { kg:'Kilogram', g:'Gram', mg:'Milligram', lb:'Pound', oz:'Ounce', t:'Metric Ton', st:'Stone' },
+    quick: [1,5,10,100]
+  },
+  temp: {
+    units: { c:null, f:null, k:null },
+    names: { c:'Celsius', f:'Fahrenheit', k:'Kelvin' },
+    quick: [0,20,37,100]
+  },
+  area: {
+    units: { m2:1, km2:1e6, cm2:0.0001, mm2:1e-6, ha:10000, acre:4046.86, ft2:0.092903, in2:0.00064516 },
+    names: { m2:'m²', km2:'km²', cm2:'cm²', mm2:'mm²', ha:'Hectare', acre:'Acre', ft2:'ft²', in2:'in²' },
+    quick: [1,10,100,500]
+  },
+  volume: {
+    units: { l:1, ml:0.001, m3:1000, gal:3.78541, qt:0.946353, pt:0.473176, cup:0.24, fl_oz:0.0295735 },
+    names: { l:'Liter', ml:'Milliliter', m3:'Cubic Meter', gal:'Gallon (US)', qt:'Quart', pt:'Pint', cup:'Cup', fl_oz:'Fl. Oz' },
+    quick: [1,5,10,100]
+  },
+  speed: {
+    units: { 'km/h':1, 'm/s':3.6, mph:1.60934, knot:1.852, 'ft/s':1.09728 },
+    names: { 'km/h':'km/h', 'm/s':'m/s', mph:'mph', knot:'Knot', 'ft/s':'ft/s' },
+    quick: [30,60,100,120]
+  },
+  data: {
+    units: { B:1, KB:1024, MB:1048576, GB:1073741824, TB:1099511627776 },
+    names: { B:'Byte', KB:'Kilobyte', MB:'Megabyte', GB:'Gigabyte', TB:'Terabyte' },
+    quick: [1,100,500,1000]
+  }
+};
+
+let cat = 'length';
+
+function tempConvert(val, from, to) {
+  let c;
+  if (from === 'c') c = val;
+  else if (from === 'f') c = (val - 32) * 5/9;
+  else c = val - 273.15;
+  if (to === 'c') return c;
+  if (to === 'f') return c * 9/5 + 32;
+  return c + 273.15;
+}
+
+function convert() {
+  const val = parseFloat(document.getElementById('val-from').value);
+  const uf = document.getElementById('unit-from').value;
+  const ut = document.getElementById('unit-to').value;
+  if (isNaN(val)) { document.getElementById('result-val').textContent = '—'; return; }
+  let result;
+  if (cat === 'temp') {
+    result = tempConvert(val, uf, ut);
+  } else {
+    const units = CATS[cat].units;
+    result = val * units[uf] / units[ut];
+  }
+  const rounded = +result.toPrecision(7);
+  document.getElementById('val-to').value = rounded;
+  document.getElementById('result-val').textContent = rounded.toLocaleString();
+  document.getElementById('result-label').textContent =
+    `${val} ${CATS[cat].names[uf] || uf} = ${rounded} ${CATS[cat].names[ut] || ut}`;
+}
+
+function buildSelects() {
+  const units = CATS[cat].units;
+  const names = CATS[cat].names;
+  const keys = Object.keys(units);
+  const html = keys.map(k => `<option value="${k}">${names[k] || k}</option>`).join('');
+  document.getElementById('unit-from').innerHTML = html;
+  document.getElementById('unit-to').innerHTML = html;
+  document.getElementById('unit-to').selectedIndex = 1;
+  // Quick buttons
+  const quick = CATS[cat].quick || [];
+  document.getElementById('quick-row').innerHTML = quick.map(v =>
+    `<button class="quick-btn" data-v="${v}">${v}</button>`
+  ).join('');
+}
+
+document.querySelectorAll('.cat-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    cat = b.dataset.cat;
+    document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    buildSelects(); convert();
+  });
+});
+document.getElementById('val-from').addEventListener('input', convert);
+document.getElementById('unit-from').addEventListener('change', convert);
+document.getElementById('unit-to').addEventListener('change', convert);
+document.getElementById('quick-row').addEventListener('click', e => {
+  const btn = e.target.closest('.quick-btn');
+  if (btn) { document.getElementById('val-from').value = btn.dataset.v; convert(); }
+});
+document.getElementById('swap-btn').addEventListener('click', () => {
+  const uf = document.getElementById('unit-from');
+  const ut = document.getElementById('unit-to');
+  const tmp = uf.value;
+  uf.value = ut.value;
+  ut.value = tmp;
+  convert();
+});
+
+buildSelects();
+convert();
+</script>
+</body>
+</html>
