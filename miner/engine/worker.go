@@ -91,15 +91,18 @@ func (w *Worker) Run(job *Job, results chan<- Result, abort <-chan struct{}) {
 	header   := job.HeaderBytes
 	jobID    := job.ID
 
-	// Pre-allocate the seal input buffer once and reuse it.
-	buf := make([]byte, len(header)+8)
+	// Pre-allocate the seal input buffer once and reuse it for every hash
+	// attempt below — SealHashInto only overwrites the trailing nonce bytes,
+	// so this loop no longer allocates per hash (see hasher.go).
+	headerLen := len(header)
+	buf := make([]byte, headerLen+8)
 	copy(buf, header)
 
 	const batchSize = 1024 // check abort / abortFlag every batchSize hashes
 
 	for {
 		for i := 0; i < batchSize; i++ {
-			hash := SealHash(buf[:len(header)], nonce)
+			hash := SealHashInto(buf, headerLen, nonce)
 			w.hashCounter.Add(1)
 
 			if HashMeetsTarget(hash, target) {

@@ -15,6 +15,8 @@
  */
 
 import type { EIP1193RequestArgs, EIP1193EventName } from '../types';
+import { uuid as _uuid } from '../utils/uuid';
+import { CHAIN_ID, CHAIN_ID_HEX } from '../crypto/constants';
 
 // ---------------------------------------------------------------------------
 // Event emitter (minimal, no external deps — runs in untrusted page context)
@@ -83,10 +85,10 @@ class BucksProvider extends SimpleEmitter {
   // EIP-1193 identity
   public readonly isBucksWallet = true;
   public readonly isMetaMask    = false;   // not MetaMask, but API-compatible
-  public readonly chainId       = '0x2000'; // 8192
+  public readonly chainId       = CHAIN_ID_HEX;
 
   // Network info
-  public readonly networkVersion = '8192';
+  public readonly networkVersion = String(CHAIN_ID);
 
   // Selected accounts (updated after eth_requestAccounts)
   public selectedAddress: string | null = null;
@@ -206,13 +208,5 @@ console.log('[BucksWallet] EIP-1193 provider injected → window.bucks');
 // ---------------------------------------------------------------------------
 // Utility
 // ---------------------------------------------------------------------------
-
-function _uuid(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
 
 export type { BucksProvider };

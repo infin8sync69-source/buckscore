@@ -16,3 +16,13 @@ export const KDF_ITERATIONS = 310_000;
  * spec (e.g. the pre-fix 2,048-iteration bug) before they're unlocked.
  */
 export const WALLET_VERSION = '1.0.0';
+
+/**
+ * Bucks chain ID. Single source of truth for the static/display literal
+ * previously duplicated across inpage/index.ts, background/handler.ts,
+ * and the popup pages — the actual EIP-155 signing path still fetches the
+ * live chain ID from the node (see background/wallet.ts `signTransaction`),
+ * this constant only backs the static provider-response/display copies.
+ */
+export const CHAIN_ID = 8192;
+export const CHAIN_ID_HEX = '0x2000'; // 8192 in hex

@@ -13,6 +13,19 @@ import (
 )
 
 // ---------------------------------------------------------------------------
+// Defaults (single source of truth for the addresses duplicated across the
+// CLI flag defaults in cmd/bucksminer/main.go and, historically, miner-gui/)
+// ---------------------------------------------------------------------------
+
+const (
+	// DefaultNodeRPCURL is the Bucks node's default JSON-RPC endpoint (solo mode).
+	DefaultNodeRPCURL = "http://127.0.0.1:8192"
+
+	// DefaultAPIAddr is the bind address for bucksminer's local monitoring API.
+	DefaultAPIAddr = "127.0.0.1:8194"
+)
+
+// ---------------------------------------------------------------------------
 // Config structs
 // ---------------------------------------------------------------------------
 
@@ -101,7 +114,7 @@ func Default() *Config {
 	threads := runtime.NumCPU()
 	return &Config{
 		Wallet: WalletConfig{Address: ""},
-		Node:   NodeConfig{RPCURL: "http://127.0.0.1:8192"},
+		Node:   NodeConfig{RPCURL: DefaultNodeRPCURL},
 		Pool:   PoolConfig{URL: "", Worker: "worker1"},
 		Mining: MiningConfig{
 			Mode:             "solo",
@@ -111,7 +124,7 @@ func Default() *Config {
 		},
 		API: APIConfig{
 			Enabled: true,
-			Addr:    "127.0.0.1:8194",
+			Addr:    DefaultAPIAddr,
 		},
 		Log: LogConfig{Level: "info", Format: "text"},
 	}
