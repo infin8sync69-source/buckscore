@@ -1,0 +1,9 @@
+torch
+torchvision
+sentence-transformers
+faiss-cpu
+matplotlib
+numpy
+requests
+scikit-learn
+umap-learn

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Universal Map</title>
+  <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
+  <style>
+    body { margin: 0; background: #05070d; overflow: hidden; color: #99a; font: 13px 'Instrument Sans', sans-serif; }
+    
+    /* Universe map background */
+    #three-bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    
+    /* Leaflet / Earth Map surface */
+    #umap-surface {
+      position: absolute; inset: 0; z-index: 1;
+      overflow: hidden; display: none; background: #0a0d14;
+    }
+    #umap-surface.open { display: block; }
+    
+    /* Agentic dock / Search bar imported from index.html */
+    #global-agent-dock {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000;
+      width: 100%; max-width: 600px;
+    }
+    .nt-search-wrap {
+      display: flex; align-items: center; padding: 0 16px; height: 50px;
+      background: linear-gradient(150deg, rgba(50,50,56,0.95), rgba(28,28,32,0.95));
+      backdrop-filter: blur(40px) brightness(1.1); -webkit-backdrop-filter: blur(40px) brightness(1.1);
+      border-radius: 25px; border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .nt-search-icon { flex: none; }
+    .nt-search-input {
+      flex: 1; background: transparent; border: none; outline: none; color: #fff;
+      font-size: 14px; margin-left: 12px; font-family: inherit;
+    }
+    .nt-search-hint { font-size: 18px; color: rgba(255,255,255,0.4); font-weight: bold; }
+    
+    /* Missing dependencies styles from main css */
+    .em-i { display: block; flex: none; }
+    .leaflet-container { width: 100%; height: 100%; background: #0b0e16; font: inherit; }
+    .leaflet-control-attribution a { color: rgba(200,208,226,0.7); }
+    .leaflet-bar { border: none; border-radius: 12px; overflow: hidden; }
+    .leaflet-bar a { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); border: none; }
+    .leaflet-bar a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .leaflet-popup-content-wrapper { background: rgba(13,15,22,0.88); border: 1px solid rgba(255,255,255,0.09); color: #fff; backdrop-filter: blur(20px); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .leaflet-popup-content { margin: 13px 15px; font: 12.5px/1.45 'Instrument Sans', sans-serif; }
+    .leaflet-popup-tip { background: rgba(13,15,22,0.88); border: 1px solid rgba(255,255,255,0.09); }
+    .leaflet-popup-close-button { color: rgba(220,226,242,0.5) !important; font-size: 17px !important; padding: 5px 7px 0 0 !important; }
+  </style>
+</head>
+<body>
+  <!-- Universe 3D Canvas -->
+  <canvas id="three-bg-canvas"></canvas>
+  
+  <!-- Earth Map Surface -->
+  <div id="umap-surface"></div>
+  
+  <!-- Global Agent Dock / Search -->
+  <div id="global-agent-dock">
+    <div id="nt-ephemeral-zone" class="nt-ephemeral-zone hidden"></div>
+    <div class="nt-search-wrap">
+      <svg class="nt-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="nt-search-input" class="nt-search-input" type="text" placeholder="Ask Bucks, search the web, or find a place — try “Mysore” or “Bangalore to Mysore”" autocomplete="off" spellcheck="false" />
+      <span class="nt-search-hint">↵</span>
+    </div>
+  </div>
+
+  <script src="node_modules/leaflet/dist/leaflet.js"></script>
+  <script src="three.min.js"></script>
+  <script src="universe-data.js"></script>
+  <script src="universe-map.js"></script>
+  <script src="earth-maps.js"></script>
+</body>
+</html>

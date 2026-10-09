@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+qdrant_data/
+soul_interactions.jsonl
+soul_agent_params.json
+soul_pheromones.json
+*.log
+.git/

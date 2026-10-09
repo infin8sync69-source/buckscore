@@ -1,0 +1,867 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   A2UI Results — layouts for the unified result surface.
+
+   Every colour here resolves to a token from styles.css. No literal hues:
+   the app's palette is neutral by design ("emphasis is luminance, not hue"),
+   and these surfaces must hold up in both the dark and light themes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.a2r-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  container-type: inline-size;
+}
+
+/* ── Header + layout switcher ── */
+.a2r-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.a2r-head-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.a2r-label {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
+}
+
+.a2r-count {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
+.a2r-switch {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+}
+
+.a2r-switch-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  transition: color .16s ease, background .16s ease;
+}
+.a2r-switch-btn:hover { color: var(--text-primary); background: var(--hover-bg); }
+.a2r-switch-btn.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+.a2r-switch-btn:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Answer card affordances + follow-up composer.
+   These live alongside the result surface and share its token vocabulary.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Agent activity trace ──
+   Each thinking step / tool call is a row; the active one pulses, finished
+   rows stay as a record of how the answer was actually assembled. */
+.a2ui-trace {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.a2ui-trace-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
+.a2ui-trace-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--text-tertiary);
+  opacity: .45;
+}
+
+.a2ui-trace-row.is-active { color: var(--text-primary); }
+.a2ui-trace-row.is-active .a2ui-trace-dot {
+  opacity: 1;
+  background: var(--text-primary);
+  animation: a2ui-trace-pulse 1.1s ease-in-out infinite;
+}
+.a2ui-trace-row.is-done .a2ui-trace-dot { opacity: .7; }
+.a2ui-trace-row.is-done { color: var(--text-secondary); }
+.a2ui-trace-label { min-width: 0; word-break: break-word; }
+
+@keyframes a2ui-trace-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;  }
+  50%      { transform: scale(1.6); opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .a2ui-trace-row.is-active .a2ui-trace-dot { animation: none; }
+}
+
+/* ── Lightbox for image preview ──
+   Click an image result → preview full-size inline, no navigation away from
+   the results. Esc or click the backdrop closes it. */
+#a2r-lightbox {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.a2r-lb-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .88);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.a2r-lb-container {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+}
+.a2r-lb-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+}
+.a2r-lb-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.a2r-lb-info p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  color: var(--text-primary);
+}
+.a2r-lb-link {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease;
+}
+.a2r-lb-link:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.a2r-lb-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .6);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  cursor: pointer;
+}
+.a2r-lb-close svg { width: 16px; height: 16px; }
+.a2r-lb-close:hover { background: rgba(0, 0, 0, .8); }
+
+/* Inline citation — reads as a reference mark, not a shouted hostname. */
+.a2ui-cite {
+  display: inline-block;
+  padding: 1px 7px;
+  margin: 0 1px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg);
+  color: var(--text-tertiary) !important;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none !important;
+  vertical-align: 1px;
+  cursor: pointer;
+}
+.a2ui-cite:hover {
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong);
+}
+
+.a2ui-answer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.a2ui-answer-card .a2ui-answer-label {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.a2ui-copy {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg);
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  transition: color .16s ease, background .16s ease;
+}
+.a2ui-copy svg { width: 13px; height: 13px; }
+.a2ui-copy:hover { color: var(--text-primary); background: var(--hover-bg); }
+.a2ui-copy:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
+.a2ui-copy.is-done { color: var(--text-primary); border-color: var(--border-strong); }
+
+/* Suggested next questions — sit on the prompt bar, so continuing the thread
+   is always the same gesture in the same place. */
+#a2ui-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Enhanced skeleton loader — mirrors actual card layout structure
+   ───────────────────────────────────────────────────────────────────────── */
+
+.a2ui-skeleton-container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+.a2ui-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.a2ui-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 14px;
+  padding: 0;
+  min-width: 0;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.a2ui-skeleton-card:nth-child(1) { animation-delay: 0ms; }
+.a2ui-skeleton-card:nth-child(2) { animation-delay: 80ms; }
+.a2ui-skeleton-card:nth-child(3) { animation-delay: 160ms; }
+.a2ui-skeleton-card:nth-child(4) { animation-delay: 240ms; }
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.a2ui-skeleton-card-hero {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.a2ui-skeleton-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--input-bg) 0%,
+    var(--hover-bg) 50%,
+    var(--input-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerFlow 2s infinite;
+  border: 1px solid var(--border-subtle);
+}
+
+.a2ui-skeleton-media-hero {
+  aspect-ratio: 16 / 9;
+}
+
+@keyframes shimmerFlow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.a2ui-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.a2ui-skeleton-line {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--hover-bg) 0%,
+    var(--input-bg) 50%,
+    var(--hover-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerFlow 2s infinite;
+  min-height: 14px;
+}
+
+/* Responsive — collapse hero to single column on narrow containers */
+@container (max-width: 640px) {
+  .a2ui-skeleton-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .a2ui-skeleton-card-hero {
+    grid-column: span 1;
+  }
+}
+
+@container (max-width: 420px) {
+  .a2ui-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Smooth fade-out when content loads */
+.a2ui-skeleton-container.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.a2ui-chip {
+  appearance: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.3;
+  text-align: left;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.a2ui-chip:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+  border-color: var(--border-strong);
+}
+.a2ui-chip:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
+
+/* ── Follow-up composer ── */
+#a2ui-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+  position: sticky;
+  bottom: 8px;
+  z-index: 5;
+  padding: 8px 8px 8px 14px;
+  border-radius: 18px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: border-color .16s ease;
+}
+#a2ui-composer:focus-within { border-color: var(--border-strong); }
+
+#a2ui-composer-input {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 7px 0;
+  max-height: 160px;
+}
+#a2ui-composer-input::placeholder { color: var(--text-tertiary); }
+
+#a2ui-composer-send {
+  appearance: none;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  transition: opacity .16s ease;
+}
+#a2ui-composer-send svg { width: 16px; height: 16px; }
+#a2ui-composer-send:hover { opacity: .85; }
+#a2ui-composer-send:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; }
+
+.a2r-head-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.a2r-collapse {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--input-bg);
+  color: var(--text-tertiary);
+  transition: color .16s ease, background .16s ease, transform .2s ease;
+}
+.a2r-collapse svg { width: 14px; height: 14px; }
+.a2r-collapse:hover { color: var(--text-primary); background: var(--hover-bg); }
+.a2r-collapse:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
+
+.a2r-section.is-collapsed .a2r-stage { display: none; }
+.a2r-section.is-collapsed .a2r-collapse { transform: rotate(-90deg); }
+.a2r-section.is-collapsed { gap: 0; }
+
+/* ── Card shell (shared by every layout) ── */
+.a2r-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: 14px;
+  background: transparent;
+  transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s ease;
+  will-change: transform;
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.a2r-card:hover { transform: translateY(-2px); }
+.a2r-card:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 3px;
+}
+
+.a2r-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--input-bg) 0%, var(--hover-bg) 100%);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  animation: shimmerFlow 2s infinite;
+}
+
+.a2r-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .35s cubic-bezier(.2,.7,.3,1), opacity .2s ease;
+  opacity: 0;
+  animation: fadeInImage 0.4s ease forwards;
+}
+
+.a2r-media img[src] { animation: fadeInImage 0.4s ease forwards; }
+
+@keyframes fadeInImage {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.a2r-card:hover .a2r-media img { transform: scale(1.04); }
+
+/* Missing/broken image — a calm lettermark, never a torn-image icon. */
+.a2r-media-empty {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(150deg, var(--hover-bg), transparent 70%),
+    var(--input-bg);
+}
+.a2r-lettermark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: clamp(18px, 22cqw, 40px);
+  font-weight: 800;
+  color: var(--text-tertiary);
+  opacity: .55;
+  user-select: none;
+  /* Sits behind the thumbnail; revealed the moment the image drops out. */
+  z-index: 0;
+}
+.a2r-media img { position: relative; z-index: 1; }
+.a2r-media-empty img { display: none; }
+.a2r-media-empty {
+  background:
+    linear-gradient(150deg, var(--hover-bg), transparent 70%),
+    var(--input-bg);
+}
+
+/* Play affordance for video results */
+.a2r-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .30);
+  color: #fff;
+  transition: transform .18s ease, background .18s ease;
+}
+.a2r-play svg { width: 18px; height: 18px; margin-left: 2px; }
+.a2r-card:hover .a2r-play { transform: scale(1.08); background: rgba(0, 0, 0, .72); }
+.a2r-play:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ── Inline player ──
+   Watching happens in place; the result set stays on screen behind it. */
+.a2r-media.is-playing { border-color: var(--border-strong); }
+.a2r-media iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.a2r-media.is-playing .a2r-open { display: none; }
+
+.a2r-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  background: rgba(0, 0, 0, .68);
+  backdrop-filter: blur(8px);
+  color: #fff;
+}
+.a2r-close svg { width: 13px; height: 13px; }
+.a2r-close:hover { background: rgba(0, 0, 0, .85); }
+
+/* ── Open-in-tab control ──
+   Revealed on hover/focus so it never competes with the thumbnail, but it is
+   always reachable by keyboard. */
+.a2r-open {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  background: rgba(0, 0, 0, .60);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity .16s ease, transform .16s ease, background .16s ease;
+}
+.a2r-open svg { width: 13px; height: 13px; }
+.a2r-open:hover { background: rgba(0, 0, 0, .82); }
+.a2r-card:hover .a2r-open,
+.a2r-open:focus-visible { opacity: 1; transform: translateY(0); }
+.a2r-open:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+
+/* The row thumbnail is only ~116px wide — a floating button would cover it. */
+.a2r-row .a2r-open { display: none; }
+
+.a2r-dur {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, .78);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+}
+
+.a2r-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.a2r-src {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.a2r-fav {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.a2r-domain,
+.a2r-meta,
+.a2r-date {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The domain is the identity — it keeps its width; the softer metadata
+   yields first when the row runs out of room. */
+.a2r-domain { flex-shrink: 0; max-width: 46%; }
+.a2r-meta { min-width: 0; }
+.a2r-date { flex-shrink: 0; margin-left: auto; padding-left: 8px; font-variant-numeric: tabular-nums; }
+.a2r-meta::before { content: '·'; margin-right: 6px; }
+
+.a2r-title {
+  margin: 0;
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.011em;
+  color: var(--text-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.a2r-card:hover .a2r-title {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: text-decoration 0.16s ease;
+}
+
+.a2r-snippet {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout: Mosaic ── */
+.a2r-grid { display: grid; gap: 14px; }
+
+.a2r-mosaic { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.a2r-cell { min-width: 0; }
+.a2r-cell-hero { grid-column: span 2; grid-row: span 2; }
+.a2r-cell-hero .a2r-title { font-size: 17px; -webkit-line-clamp: 3; }
+.a2r-cell-hero .a2r-snippet { -webkit-line-clamp: 4; font-size: 13px; }
+
+/* ── Layout: Magazine ── */
+.a2r-magazine {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.a2r-lead .a2r-title { font-size: 19px; -webkit-line-clamp: 3; letter-spacing: -0.018em; }
+.a2r-lead .a2r-snippet { -webkit-line-clamp: 4; font-size: 13px; }
+
+.a2r-rundown { display: flex; flex-direction: column; }
+.a2r-rundown .a2r-card { padding: 10px 0; }
+.a2r-rundown .a2r-card + .a2r-card { border-top: 1px solid var(--border-subtle); }
+
+/* ── Layout: List / row card ── */
+.a2r-list { display: flex; flex-direction: column; }
+.a2r-list .a2r-card { padding: 13px 0; }
+.a2r-list .a2r-card + .a2r-card { border-top: 1px solid var(--border-subtle); }
+
+.a2r-row {
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 14px;
+}
+.a2r-row .a2r-media { width: 116px; }
+.a2r-row .a2r-body { flex: 1; }
+.a2r-row .a2r-play { width: 30px; height: 30px; }
+.a2r-row .a2r-play svg { width: 13px; height: 13px; }
+
+/* ── Layout: Gallery ──
+   Tiles are ~160px wide; at that size a truncated "youtu… · IBM Technolog…"
+   carries no information, so the soft metadata and the date drop out and the
+   title gets the second line instead. */
+.a2r-gallery { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px; }
+.a2r-plate .a2r-body { gap: 3px; }
+.a2r-plate .a2r-title { font-size: 12.5px; -webkit-line-clamp: 2; font-weight: 650; line-height: 1.28; }
+.a2r-plate .a2r-snippet { display: none; }
+.a2r-plate .a2r-meta,
+.a2r-plate .a2r-date { display: none; }
+.a2r-plate .a2r-domain { max-width: 100%; }
+
+/* ── Container-driven responsiveness ──
+   These panels live in a narrow sidebar column as often as full width, so
+   they respond to their own width rather than the viewport's. */
+@container (max-width: 720px) {
+  .a2r-mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .a2r-magazine { grid-template-columns: minmax(0, 1fr); }
+  /* A hero spanning both columns is the full panel width here — too much
+     weight for one result. Let it sit in the ordinary rhythm instead. */
+  .a2r-cell-hero { grid-column: span 2; grid-row: span 1; }
+  .a2r-cell-hero .a2r-title { font-size: 15px; }
+}
+@container (max-width: 420px) {
+  .a2r-mosaic { grid-template-columns: minmax(0, 1fr); }
+  .a2r-cell-hero { grid-column: span 1; }
+  .a2r-gallery { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+  /* Stay a row: stacking gives one result a full-width image and pushes the
+     rest of the list off-screen in a sidebar this narrow. */
+  .a2r-row { gap: 11px; }
+  .a2r-row .a2r-media { width: 84px; }
+  .a2r-row .a2r-title { font-size: 13px; }
+  .a2r-row .a2r-snippet { -webkit-line-clamp: 2; font-size: 12px; }
+  .a2r-row .a2r-date { display: none; }
+  .a2r-switch-btn { padding: 5px 9px; font-size: 10.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .a2r-card, .a2r-media img, .a2r-play { transition: none; }
+  .a2r-card:hover { transform: none; }
+  .a2r-card:hover .a2r-media img { transform: none; }
+}

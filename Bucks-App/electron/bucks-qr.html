@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Generator — Bucks</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- QR code library (pure JS, no external network needed after load) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background: radial-gradient(58% 50% at 18% 8%, rgba(255, 255, 255, 0.18), transparent 62%),
+                radial-gradient(45% 45% at 86% 70%, rgba(255, 255, 255, 0.12), transparent 65%),
+                linear-gradient(165deg, #1f1f23 0%, #151518 55%, #0d0d10 100%);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .container {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; text-align: center; }
+  .card {
+    border-radius: 24px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.42), rgba(30,30,34,0.32));
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .type-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .type-btn {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .type-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+  }
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 2px;
+  }
+  textarea, input[type="text"], input[type="tel"], input[type="email"] {
+    width: 100%;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    resize: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus, input:focus { border-color: rgba(255, 255, 255, 0.5); }
+  textarea { min-height: 80px; line-height: 1.5; }
+  .fields { display: flex; flex-direction: column; gap: 10px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gen-btn {
+    padding: 13px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #35353d, #1b1b21);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .gen-btn:hover { opacity: 0.9; }
+  .gen-btn:active { transform: scale(0.98); }
+  .qr-output {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    display: none;
+  }
+  .qr-wrap {
+    padding: 20px;
+    border-radius: 20px;
+    background: #fff;
+    display: inline-block;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  #qr-canvas { display: block; }
+  .action-row { display: flex; gap: 10px; }
+  .dl-btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .dl-btn:hover { background: rgba(255,255,255,0.12); }
+  .qr-meta {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    max-width: 260px;
+    word-break: break-all;
+  }
+  .color-row { display: flex; gap: 10px; align-items: center; }
+  .color-row label { font-size: 12px; color: rgba(255,255,255,0.5); flex: 1; }
+  .color-row input[type="color"] {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 2px;
+    background: rgba(0,0,0,0.28);
+    cursor: pointer;
+  }
+  .size-row { display: flex; align-items: center; gap: 10px; }
+  .size-row label { font-size: 12px; color: rgba(255,255,255,0.5); flex: 1; }
+  .size-row input[type="range"] { flex: 1; accent-color: #ffffff; }
+  .size-row span { font-size: 12px; min-width: 36px; text-align: right; color: rgba(255,255,255,0.6); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>QR Generator</h1>
+
+  <div class="card">
+    <div class="type-row">
+      <button class="type-btn active" data-type="url">URL</button>
+      <button class="type-btn" data-type="text">Text</button>
+      <button class="type-btn" data-type="email">Email</button>
+      <button class="type-btn" data-type="phone">Phone</button>
+      <button class="type-btn" data-type="wifi">Wi-Fi</button>
+      <button class="type-btn" data-type="vcard">vCard</button>
+    </div>
+
+    <!-- URL -->
+    <div class="fields" id="f-url">
+      <div class="field-label">URL</div>
+      <input type="text" id="url-val" placeholder="https://example.com" value="https://">
+    </div>
+
+    <!-- Text -->
+    <div class="fields" id="f-text" style="display:none">
+      <div class="field-label">Text</div>
+      <textarea id="text-val" placeholder="Enter any text…"></textarea>
+    </div>
+
+    <!-- Email -->
+    <div class="fields" id="f-email" style="display:none">
+      <div class="field-label">Email Address</div>
+      <input type="email" id="email-to" placeholder="someone@example.com">
+      <div class="field-label">Subject</div>
+      <input type="text" id="email-subj" placeholder="Subject…">
+      <div class="field-label">Body</div>
+      <textarea id="email-body" placeholder="Message…" style="min-height:60px"></textarea>
+    </div>
+
+    <!-- Phone -->
+    <div class="fields" id="f-phone" style="display:none">
+      <div class="field-label">Phone Number</div>
+      <input type="tel" id="phone-val" placeholder="+1 555 000 0000">
+    </div>
+
+    <!-- Wi-Fi -->
+    <div class="fields" id="f-wifi" style="display:none">
+      <div class="two-col">
+        <div><div class="field-label">Network Name (SSID)</div><input type="text" id="wifi-ssid" placeholder="MyNetwork"></div>
+        <div><div class="field-label">Password</div><input type="text" id="wifi-pass" placeholder="Password"></div>
+      </div>
+      <div><div class="field-label">Security</div>
+        <select id="wifi-enc" style="background:rgba(0,0,0,0.28);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:inherit;font-size:14px;padding:12px 14px;outline:none;width:100%">
+          <option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">Open</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- vCard -->
+    <div class="fields" id="f-vcard" style="display:none">
+      <div class="two-col">
+        <div><div class="field-label">First Name</div><input type="text" id="vc-fn" placeholder="John"></div>
+        <div><div class="field-label">Last Name</div><input type="text" id="vc-ln" placeholder="Doe"></div>
+      </div>
+      <div class="field-label">Phone</div><input type="tel" id="vc-phone" placeholder="+1 555 000 0000">
+      <div class="field-label">Email</div><input type="email" id="vc-email" placeholder="john@example.com">
+      <div class="field-label">Website</div><input type="text" id="vc-url" placeholder="https://…">
+      <div class="field-label">Organization</div><input type="text" id="vc-org" placeholder="Acme Inc.">
+    </div>
+
+    <!-- Options -->
+    <div class="color-row">
+      <label>QR Color</label>
+      <input type="color" id="qr-color" value="#000000">
+      <label style="flex:none; margin-left:8px">Background</label>
+      <input type="color" id="qr-bg" value="#ffffff">
+    </div>
+    <div class="size-row">
+      <label>Size</label>
+      <input type="range" id="qr-size" min="128" max="400" value="220" step="8">
+      <span id="size-label">220px</span>
+    </div>
+
+    <button class="gen-btn" id="gen-btn">Generate QR Code</button>
+  </div>
+
+  <div class="qr-output" id="qr-output">
+    <div class="qr-wrap"><div id="qr-canvas"></div></div>
+    <div class="action-row">
+      <button class="dl-btn" id="dl-png">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PNG
+      </button>
+      <button class="dl-btn" id="copy-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Image
+      </button>
+    </div>
+    <div class="qr-meta" id="qr-meta"></div>
+  </div>
+</div>
+
+<script>
+  let currentType = 'url';
+  let qrInstance = null;
+
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      currentType = b.dataset.type;
+      document.querySelectorAll('.type-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      ['url','text','email','phone','wifi','vcard'].forEach(t =>
+        document.getElementById('f-' + t).style.display = t === currentType ? '' : 'none'
+      );
+    });
+  });
+
+  document.getElementById('qr-size').addEventListener('input', e => {
+    document.getElementById('size-label').textContent = e.target.value + 'px';
+  });
+
+  function buildData() {
+    switch (currentType) {
+      case 'url': return document.getElementById('url-val').value.trim() || 'https://bucks.ai';
+      case 'text': return document.getElementById('text-val').value.trim() || ' ';
+      case 'email': {
+        const to = document.getElementById('email-to').value.trim();
+        const s = document.getElementById('email-subj').value.trim();
+        const b = document.getElementById('email-body').value.trim();
+        return `mailto:${to}?subject=${encodeURIComponent(s)}&body=${encodeURIComponent(b)}`;
+      }
+      case 'phone': return 'tel:' + document.getElementById('phone-val').value.trim();
+      case 'wifi': {
+        const ssid = document.getElementById('wifi-ssid').value.trim();
+        const pass = document.getElementById('wifi-pass').value;
+        const enc = document.getElementById('wifi-enc').value;
+        return `WIFI:T:${enc};S:${ssid};P:${pass};;`;
+      }
+      case 'vcard': {
+        const fn = document.getElementById('vc-fn').value.trim();
+        const ln = document.getElementById('vc-ln').value.trim();
+        const ph = document.getElementById('vc-phone').value.trim();
+        const em = document.getElementById('vc-email').value.trim();
+        const url = document.getElementById('vc-url').value.trim();
+        const org = document.getElementById('vc-org').value.trim();
+        return `BEGIN:VCARD\nVERSION:3.0\nN:${ln};${fn}\nFN:${fn} ${ln}\nTEL:${ph}\nEMAIL:${em}\nURL:${url}\nORG:${org}\nEND:VCARD`;
+      }
+    }
+  }
+
+  document.getElementById('gen-btn').addEventListener('click', () => {
+    const data = buildData();
+    const size = parseInt(document.getElementById('qr-size').value);
+    const color = document.getElementById('qr-color').value;
+    const bg = document.getElementById('qr-bg').value;
+
+    const canvas = document.getElementById('qr-canvas');
+    canvas.innerHTML = '';
+    if (qrInstance) { try { qrInstance.clear(); } catch(e) {} }
+
+    try {
+      qrInstance = new QRCode(canvas, {
+        text: data,
+        width: size,
+        height: size,
+        colorDark: color,
+        colorLight: bg,
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      document.getElementById('qr-output').style.display = 'flex';
+      const short = data.length > 60 ? data.slice(0, 57) + '…' : data;
+      document.getElementById('qr-meta').textContent = short;
+    } catch(e) {
+      alert('Could not generate QR — input may be too long or invalid.');
+    }
+  });
+
+  document.getElementById('dl-png').addEventListener('click', () => {
+    const img = document.querySelector('#qr-canvas img');
+    const canvas = document.querySelector('#qr-canvas canvas');
+    let src;
+    if (canvas) src = canvas.toDataURL('image/png');
+    else if (img) src = img.src;
+    else return;
+    const a = document.createElement('a');
+    a.href = src; a.download = 'bucks-qr.png'; a.click();
+  });
+
+  document.getElementById('copy-btn').addEventListener('click', async () => {
+    const canvas = document.querySelector('#qr-canvas canvas');
+    if (!canvas) return;
+    canvas.toBlob(async blob => {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        document.getElementById('copy-btn').textContent = '✓ Copied!';
+        setTimeout(() => document.getElementById('copy-btn').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Image`, 2000);
+      } catch(e) { alert('Copy not supported in this context'); }
+    });
+  });
+</script>
+</body>
+</html>

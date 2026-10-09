@@ -1,0 +1,800 @@
+[
+  {
+    "number": 1,
+    "name": "Al-Faatiha",
+    "arabic_name": "سُورَةُ ٱلْفَاتِحَةِ",
+    "verse_count": 7,
+    "letter_count": 139
+  },
+  {
+    "number": 2,
+    "name": "Al-Baqara",
+    "arabic_name": "سُورَةُ البَقَرَةِ",
+    "verse_count": 286,
+    "letter_count": 26118
+  },
+  {
+    "number": 3,
+    "name": "Aal-i-Imraan",
+    "arabic_name": "سُورَةُ آلِ عِمۡرَانَ",
+    "verse_count": 200,
+    "letter_count": 14847
+  },
+  {
+    "number": 4,
+    "name": "An-Nisaa",
+    "arabic_name": "سُورَةُ النِّسَاءِ",
+    "verse_count": 176,
+    "letter_count": 16196
+  },
+  {
+    "number": 5,
+    "name": "Al-Maaida",
+    "arabic_name": "سُورَةُ المَائـِدَةِ",
+    "verse_count": 120,
+    "letter_count": 12109
+  },
+  {
+    "number": 6,
+    "name": "Al-An'aam",
+    "arabic_name": "سُورَةُ الأَنۡعَامِ",
+    "verse_count": 165,
+    "letter_count": 12683
+  },
+  {
+    "number": 7,
+    "name": "Al-A'raaf",
+    "arabic_name": "سُورَةُ الأَعۡرَافِ",
+    "verse_count": 206,
+    "letter_count": 14360
+  },
+  {
+    "number": 8,
+    "name": "Al-Anfaal",
+    "arabic_name": "سُورَةُ الأَنفَالِ",
+    "verse_count": 75,
+    "letter_count": 5395
+  },
+  {
+    "number": 9,
+    "name": "At-Tawba",
+    "arabic_name": "سُورَةُ التَّوۡبَةِ",
+    "verse_count": 129,
+    "letter_count": 11024
+  },
+  {
+    "number": 10,
+    "name": "Yunus",
+    "arabic_name": "سُورَةُ يُونُسَ",
+    "verse_count": 109,
+    "letter_count": 7591
+  },
+  {
+    "number": 11,
+    "name": "Hud",
+    "arabic_name": "سُورَةُ هُودٍ",
+    "verse_count": 123,
+    "letter_count": 7804
+  },
+  {
+    "number": 12,
+    "name": "Yusuf",
+    "arabic_name": "سُورَةُ يُوسُفَ",
+    "verse_count": 111,
+    "letter_count": 7304
+  },
+  {
+    "number": 13,
+    "name": "Ar-Ra'd",
+    "arabic_name": "سُورَةُ الرَّعۡدِ",
+    "verse_count": 43,
+    "letter_count": 3550
+  },
+  {
+    "number": 14,
+    "name": "Ibrahim",
+    "arabic_name": "سُورَةُ إِبۡرَاهِيمَ",
+    "verse_count": 52,
+    "letter_count": 3531
+  },
+  {
+    "number": 15,
+    "name": "Al-Hijr",
+    "arabic_name": "سُورَةُ الحِجۡرِ",
+    "verse_count": 99,
+    "letter_count": 2865
+  },
+  {
+    "number": 16,
+    "name": "An-Nahl",
+    "arabic_name": "سُورَةُ النَّحۡلِ",
+    "verse_count": 128,
+    "letter_count": 7780
+  },
+  {
+    "number": 17,
+    "name": "Al-Israa",
+    "arabic_name": "سُورَةُ الإِسۡرَاءِ",
+    "verse_count": 111,
+    "letter_count": 6647
+  },
+  {
+    "number": 18,
+    "name": "Al-Kahf",
+    "arabic_name": "سُورَةُ الكَهۡفِ",
+    "verse_count": 110,
+    "letter_count": 6565
+  },
+  {
+    "number": 19,
+    "name": "Maryam",
+    "arabic_name": "سُورَةُ مَرۡيَمَ",
+    "verse_count": 98,
+    "letter_count": 3917
+  },
+  {
+    "number": 20,
+    "name": "Taa-Haa",
+    "arabic_name": "سُورَةُ طه",
+    "verse_count": 135,
+    "letter_count": 5401
+  },
+  {
+    "number": 21,
+    "name": "Al-Anbiyaa",
+    "arabic_name": "سُورَةُ الأَنبِيَاءِ",
+    "verse_count": 112,
+    "letter_count": 5044
+  },
+  {
+    "number": 22,
+    "name": "Al-Hajj",
+    "arabic_name": "سُورَةُ الحَجِّ",
+    "verse_count": 78,
+    "letter_count": 5297
+  },
+  {
+    "number": 23,
+    "name": "Al-Muminoon",
+    "arabic_name": "سُورَةُ المُؤۡمِنُونَ",
+    "verse_count": 118,
+    "letter_count": 4445
+  },
+  {
+    "number": 24,
+    "name": "An-Noor",
+    "arabic_name": "سُورَةُ النُّورِ",
+    "verse_count": 64,
+    "letter_count": 5731
+  },
+  {
+    "number": 25,
+    "name": "Al-Furqaan",
+    "arabic_name": "سُورَةُ الفُرۡقَانِ",
+    "verse_count": 77,
+    "letter_count": 3871
+  },
+  {
+    "number": 26,
+    "name": "Ash-Shu'araa",
+    "arabic_name": "سُورَةُ الشُّعَرَاءِ",
+    "verse_count": 227,
+    "letter_count": 5616
+  },
+  {
+    "number": 27,
+    "name": "An-Naml",
+    "arabic_name": "سُورَةُ النَّمۡلِ",
+    "verse_count": 93,
+    "letter_count": 4804
+  },
+  {
+    "number": 28,
+    "name": "Al-Qasas",
+    "arabic_name": "سُورَةُ القَصَصِ",
+    "verse_count": 88,
+    "letter_count": 5933
+  },
+  {
+    "number": 29,
+    "name": "Al-Ankaboot",
+    "arabic_name": "سُورَةُ العَنكَبُوتِ",
+    "verse_count": 69,
+    "letter_count": 4303
+  },
+  {
+    "number": 30,
+    "name": "Ar-Room",
+    "arabic_name": "سُورَةُ الرُّومِ",
+    "verse_count": 60,
+    "letter_count": 3485
+  },
+  {
+    "number": 31,
+    "name": "Luqman",
+    "arabic_name": "سُورَةُ لُقۡمَانَ",
+    "verse_count": 34,
+    "letter_count": 2169
+  },
+  {
+    "number": 32,
+    "name": "As-Sajda",
+    "arabic_name": "سُورَةُ السَّجۡدَةِ",
+    "verse_count": 30,
+    "letter_count": 1571
+  },
+  {
+    "number": 33,
+    "name": "Al-Ahzaab",
+    "arabic_name": "سُورَةُ الأَحۡزَابِ",
+    "verse_count": 73,
+    "letter_count": 5722
+  },
+  {
+    "number": 34,
+    "name": "Saba",
+    "arabic_name": "سُورَةُ سَبَإٍ",
+    "verse_count": 54,
+    "letter_count": 3593
+  },
+  {
+    "number": 35,
+    "name": "Faatir",
+    "arabic_name": "سُورَةُ فَاطِرٍ",
+    "verse_count": 45,
+    "letter_count": 3230
+  },
+  {
+    "number": 36,
+    "name": "Yaseen",
+    "arabic_name": "سُورَةُ يسٓ",
+    "verse_count": 83,
+    "letter_count": 3053
+  },
+  {
+    "number": 37,
+    "name": "As-Saaffaat",
+    "arabic_name": "سُورَةُ الصَّافَّاتِ",
+    "verse_count": 182,
+    "letter_count": 3869
+  },
+  {
+    "number": 38,
+    "name": "Saad",
+    "arabic_name": "سُورَةُ صٓ",
+    "verse_count": 88,
+    "letter_count": 3067
+  },
+  {
+    "number": 39,
+    "name": "Az-Zumar",
+    "arabic_name": "سُورَةُ الزُّمَرِ",
+    "verse_count": 75,
+    "letter_count": 4851
+  },
+  {
+    "number": 40,
+    "name": "Ghafir",
+    "arabic_name": "سُورَةُ غَافِرٍ",
+    "verse_count": 85,
+    "letter_count": 5092
+  },
+  {
+    "number": 41,
+    "name": "Fussilat",
+    "arabic_name": "سُورَةُ فُصِّلَتۡ",
+    "verse_count": 54,
+    "letter_count": 3375
+  },
+  {
+    "number": 42,
+    "name": "Ash-Shura",
+    "arabic_name": "سُورَةُ الشُّورَىٰ",
+    "verse_count": 53,
+    "letter_count": 3529
+  },
+  {
+    "number": 43,
+    "name": "Az-Zukhruf",
+    "arabic_name": "سُورَةُ الزُّخۡرُفِ",
+    "verse_count": 89,
+    "letter_count": 3599
+  },
+  {
+    "number": 44,
+    "name": "Ad-Dukhaan",
+    "arabic_name": "سُورَةُ الدُّخَانِ",
+    "verse_count": 59,
+    "letter_count": 1481
+  },
+  {
+    "number": 45,
+    "name": "Al-Jaathiya",
+    "arabic_name": "سُورَةُ الجَاثِيَةِ",
+    "verse_count": 37,
+    "letter_count": 2079
+  },
+  {
+    "number": 46,
+    "name": "Al-Ahqaf",
+    "arabic_name": "سُورَةُ الأَحۡقَافِ",
+    "verse_count": 35,
+    "letter_count": 2667
+  },
+  {
+    "number": 47,
+    "name": "Muhammad",
+    "arabic_name": "سُورَةُ مُحَمَّدٍ",
+    "verse_count": 38,
+    "letter_count": 2415
+  },
+  {
+    "number": 48,
+    "name": "Al-Fath",
+    "arabic_name": "سُورَةُ الفَتۡحِ",
+    "verse_count": 29,
+    "letter_count": 2515
+  },
+  {
+    "number": 49,
+    "name": "Al-Hujuraat",
+    "arabic_name": "سُورَةُ الحُجُرَاتِ",
+    "verse_count": 18,
+    "letter_count": 1532
+  },
+  {
+    "number": 50,
+    "name": "Qaaf",
+    "arabic_name": "سُورَةُ قٓ",
+    "verse_count": 45,
+    "letter_count": 1516
+  },
+  {
+    "number": 51,
+    "name": "Adh-Dhaariyat",
+    "arabic_name": "سُورَةُ الذَّارِيَاتِ",
+    "verse_count": 60,
+    "letter_count": 1551
+  },
+  {
+    "number": 52,
+    "name": "At-Tur",
+    "arabic_name": "سُورَةُ الطُّورِ",
+    "verse_count": 49,
+    "letter_count": 1329
+  },
+  {
+    "number": 53,
+    "name": "An-Najm",
+    "arabic_name": "سُورَةُ النَّجۡمِ",
+    "verse_count": 62,
+    "letter_count": 1454
+  },
+  {
+    "number": 54,
+    "name": "Al-Qamar",
+    "arabic_name": "سُورَةُ القَمَرِ",
+    "verse_count": 55,
+    "letter_count": 1483
+  },
+  {
+    "number": 55,
+    "name": "Ar-Rahmaan",
+    "arabic_name": "سُورَةُ الرَّحۡمَٰن",
+    "verse_count": 78,
+    "letter_count": 1680
+  },
+  {
+    "number": 56,
+    "name": "Al-Waaqia",
+    "arabic_name": "سُورَةُ الوَاقِعَةِ",
+    "verse_count": 96,
+    "letter_count": 1743
+  },
+  {
+    "number": 57,
+    "name": "Al-Hadid",
+    "arabic_name": "سُورَةُ الحَدِيدِ",
+    "verse_count": 29,
+    "letter_count": 2543
+  },
+  {
+    "number": 58,
+    "name": "Al-Mujaadila",
+    "arabic_name": "سُورَةُ المُجَادلَةِ",
+    "verse_count": 22,
+    "letter_count": 2037
+  },
+  {
+    "number": 59,
+    "name": "Al-Hashr",
+    "arabic_name": "سُورَةُ الحَشۡرِ",
+    "verse_count": 24,
+    "letter_count": 1958
+  },
+  {
+    "number": 60,
+    "name": "Al-Mumtahana",
+    "arabic_name": "سُورَةُ المُمۡتَحنَةِ",
+    "verse_count": 13,
+    "letter_count": 1565
+  },
+  {
+    "number": 61,
+    "name": "As-Saff",
+    "arabic_name": "سُورَةُ الصَّفِّ",
+    "verse_count": 14,
+    "letter_count": 973
+  },
+  {
+    "number": 62,
+    "name": "Al-Jumu'a",
+    "arabic_name": "سُورَةُ الجُمُعَةِ",
+    "verse_count": 11,
+    "letter_count": 778
+  },
+  {
+    "number": 63,
+    "name": "Al-Munaafiqoon",
+    "arabic_name": "سُورَةُ المُنَافِقُونَ",
+    "verse_count": 11,
+    "letter_count": 808
+  },
+  {
+    "number": 64,
+    "name": "At-Taghaabun",
+    "arabic_name": "سُورَةُ التَّغَابُنِ",
+    "verse_count": 18,
+    "letter_count": 1097
+  },
+  {
+    "number": 65,
+    "name": "At-Talaaq",
+    "arabic_name": "سُورَةُ الطَّلَاقِ",
+    "verse_count": 12,
+    "letter_count": 1218
+  },
+  {
+    "number": 66,
+    "name": "At-Tahrim",
+    "arabic_name": "سُورَةُ التَّحۡرِيمِ",
+    "verse_count": 12,
+    "letter_count": 1102
+  },
+  {
+    "number": 67,
+    "name": "Al-Mulk",
+    "arabic_name": "سُورَةُ المُلۡكِ",
+    "verse_count": 30,
+    "letter_count": 1357
+  },
+  {
+    "number": 68,
+    "name": "Al-Qalam",
+    "arabic_name": "سُورَةُ القَلَمِ",
+    "verse_count": 52,
+    "letter_count": 1290
+  },
+  {
+    "number": 69,
+    "name": "Al-Haaqqa",
+    "arabic_name": "سُورَةُ الحَاقَّةِ",
+    "verse_count": 52,
+    "letter_count": 1143
+  },
+  {
+    "number": 70,
+    "name": "Al-Ma'aarij",
+    "arabic_name": "سُورَةُ المَعَارِجِ",
+    "verse_count": 44,
+    "letter_count": 974
+  },
+  {
+    "number": 71,
+    "name": "Nooh",
+    "arabic_name": "سُورَةُ نُوحٍ",
+    "verse_count": 28,
+    "letter_count": 976
+  },
+  {
+    "number": 72,
+    "name": "Al-Jinn",
+    "arabic_name": "سُورَةُ الجِنِّ",
+    "verse_count": 28,
+    "letter_count": 1134
+  },
+  {
+    "number": 73,
+    "name": "Al-Muzzammil",
+    "arabic_name": "سُورَةُ المُزَّمِّلِ",
+    "verse_count": 20,
+    "letter_count": 876
+  },
+  {
+    "number": 74,
+    "name": "Al-Muddaththir",
+    "arabic_name": "سُورَةُ المُدَّثِّرِ",
+    "verse_count": 56,
+    "letter_count": 1050
+  },
+  {
+    "number": 75,
+    "name": "Al-Qiyaama",
+    "arabic_name": "سُورَةُ القِيَامَةِ",
+    "verse_count": 40,
+    "letter_count": 700
+  },
+  {
+    "number": 76,
+    "name": "Al-Insaan",
+    "arabic_name": "سُورَةُ الإِنسَانِ",
+    "verse_count": 31,
+    "letter_count": 1103
+  },
+  {
+    "number": 77,
+    "name": "Al-Mursalaat",
+    "arabic_name": "سُورَةُ المُرۡسَلَاتِ",
+    "verse_count": 50,
+    "letter_count": 843
+  },
+  {
+    "number": 78,
+    "name": "An-Naba",
+    "arabic_name": "سُورَةُ النَّبَإِ",
+    "verse_count": 40,
+    "letter_count": 799
+  },
+  {
+    "number": 79,
+    "name": "An-Naazi'aat",
+    "arabic_name": "سُورَةُ النَّازِعَاتِ",
+    "verse_count": 46,
+    "letter_count": 794
+  },
+  {
+    "number": 80,
+    "name": "Abasa",
+    "arabic_name": "سُورَةُ عَبَسَ",
+    "verse_count": 42,
+    "letter_count": 580
+  },
+  {
+    "number": 81,
+    "name": "At-Takwir",
+    "arabic_name": "سُورَةُ التَّكۡوِيرِ",
+    "verse_count": 29,
+    "letter_count": 452
+  },
+  {
+    "number": 82,
+    "name": "Al-Infitaar",
+    "arabic_name": "سُورَةُ الانفِطَارِ",
+    "verse_count": 19,
+    "letter_count": 348
+  },
+  {
+    "number": 83,
+    "name": "Al-Mutaffifin",
+    "arabic_name": "سُورَةُ المُطَفِّفِينَ",
+    "verse_count": 36,
+    "letter_count": 767
+  },
+  {
+    "number": 84,
+    "name": "Al-Inshiqaaq",
+    "arabic_name": "سُورَةُ الانشِقَاقِ",
+    "verse_count": 25,
+    "letter_count": 469
+  },
+  {
+    "number": 85,
+    "name": "Al-Burooj",
+    "arabic_name": "سُورَةُ البُرُوجِ",
+    "verse_count": 22,
+    "letter_count": 484
+  },
+  {
+    "number": 86,
+    "name": "At-Taariq",
+    "arabic_name": "سُورَةُ الطَّارِقِ",
+    "verse_count": 17,
+    "letter_count": 275
+  },
+  {
+    "number": 87,
+    "name": "Al-A'laa",
+    "arabic_name": "سُورَةُ الأَعۡلَىٰ",
+    "verse_count": 19,
+    "letter_count": 318
+  },
+  {
+    "number": 88,
+    "name": "Al-Ghaashiya",
+    "arabic_name": "سُورَةُ الغَاشِيَةِ",
+    "verse_count": 26,
+    "letter_count": 399
+  },
+  {
+    "number": 89,
+    "name": "Al-Fajr",
+    "arabic_name": "سُورَةُ الفَجۡرِ",
+    "verse_count": 30,
+    "letter_count": 600
+  },
+  {
+    "number": 90,
+    "name": "Al-Balad",
+    "arabic_name": "سُورَةُ البَلَدِ",
+    "verse_count": 20,
+    "letter_count": 359
+  },
+  {
+    "number": 91,
+    "name": "Ash-Shams",
+    "arabic_name": "سُورَةُ الشَّمۡسِ",
+    "verse_count": 15,
+    "letter_count": 269
+  },
+  {
+    "number": 92,
+    "name": "Al-Lail",
+    "arabic_name": "سُورَةُ اللَّيۡلِ",
+    "verse_count": 21,
+    "letter_count": 338
+  },
+  {
+    "number": 93,
+    "name": "Ad-Dhuhaa",
+    "arabic_name": "سُورَةُ الضُّحَىٰ",
+    "verse_count": 11,
+    "letter_count": 185
+  },
+  {
+    "number": 94,
+    "name": "Ash-Sharh",
+    "arabic_name": "سُورَةُ الشَّرۡحِ",
+    "verse_count": 8,
+    "letter_count": 121
+  },
+  {
+    "number": 95,
+    "name": "At-Tin",
+    "arabic_name": "سُورَةُ التِّينِ",
+    "verse_count": 8,
+    "letter_count": 176
+  },
+  {
+    "number": 96,
+    "name": "Al-Alaq",
+    "arabic_name": "سُورَةُ العَلَقِ",
+    "verse_count": 19,
+    "letter_count": 305
+  },
+  {
+    "number": 97,
+    "name": "Al-Qadr",
+    "arabic_name": "سُورَةُ القَدۡرِ",
+    "verse_count": 5,
+    "letter_count": 131
+  },
+  {
+    "number": 98,
+    "name": "Al-Bayyina",
+    "arabic_name": "سُورَةُ البَيِّنَةِ",
+    "verse_count": 8,
+    "letter_count": 417
+  },
+  {
+    "number": 99,
+    "name": "Az-Zalzala",
+    "arabic_name": "سُورَةُ الزَّلۡزَلَةِ",
+    "verse_count": 8,
+    "letter_count": 177
+  },
+  {
+    "number": 100,
+    "name": "Al-Aadiyaat",
+    "arabic_name": "سُورَةُ العَادِيَاتِ",
+    "verse_count": 11,
+    "letter_count": 188
+  },
+  {
+    "number": 101,
+    "name": "Al-Qaari'a",
+    "arabic_name": "سُورَةُ القَارِعَةِ",
+    "verse_count": 11,
+    "letter_count": 180
+  },
+  {
+    "number": 102,
+    "name": "At-Takaathur",
+    "arabic_name": "سُورَةُ التَّكَاثُرِ",
+    "verse_count": 8,
+    "letter_count": 142
+  },
+  {
+    "number": 103,
+    "name": "Al-Asr",
+    "arabic_name": "سُورَةُ العَصۡرِ",
+    "verse_count": 3,
+    "letter_count": 90
+  },
+  {
+    "number": 104,
+    "name": "Al-Humaza",
+    "arabic_name": "سُورَةُ الهُمَزَةِ",
+    "verse_count": 9,
+    "letter_count": 156
+  },
+  {
+    "number": 105,
+    "name": "Al-Fil",
+    "arabic_name": "سُورَةُ الفِيلِ",
+    "verse_count": 5,
+    "letter_count": 115
+  },
+  {
+    "number": 106,
+    "name": "Quraish",
+    "arabic_name": "سُورَةُ قُرَيۡشٍ",
+    "verse_count": 4,
+    "letter_count": 95
+  },
+  {
+    "number": 107,
+    "name": "Al-Maa'un",
+    "arabic_name": "سُورَةُ المَاعُونِ",
+    "verse_count": 7,
+    "letter_count": 133
+  },
+  {
+    "number": 108,
+    "name": "Al-Kawthar",
+    "arabic_name": "سُورَةُ الكَوۡثَرِ",
+    "verse_count": 3,
+    "letter_count": 61
+  },
+  {
+    "number": 109,
+    "name": "Al-Kaafiroon",
+    "arabic_name": "سُورَةُ الكَافِرُونَ",
+    "verse_count": 6,
+    "letter_count": 114
+  },
+  {
+    "number": 110,
+    "name": "An-Nasr",
+    "arabic_name": "سُورَةُ النَّصۡرِ",
+    "verse_count": 3,
+    "letter_count": 100
+  },
+  {
+    "number": 111,
+    "name": "Al-Masad",
+    "arabic_name": "سُورَةُ المَسَدِ",
+    "verse_count": 5,
+    "letter_count": 102
+  },
+  {
+    "number": 112,
+    "name": "Al-Ikhlaas",
+    "arabic_name": "سُورَةُ الإِخۡلَاصِ",
+    "verse_count": 4,
+    "letter_count": 67
+  },
+  {
+    "number": 113,
+    "name": "Al-Falaq",
+    "arabic_name": "سُورَةُ الفَلَقِ",
+    "verse_count": 5,
+    "letter_count": 90
+  },
+  {
+    "number": 114,
+    "name": "An-Naas",
+    "arabic_name": "سُورَةُ النَّاسِ",
+    "verse_count": 6,
+    "letter_count": 99
+  }
+]

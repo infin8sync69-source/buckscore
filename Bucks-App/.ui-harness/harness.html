@@ -1,0 +1,135 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>A2UI Results — layout harness</title>
+<link rel="stylesheet" href="../electron/styles.css?v=1786692757">
+<link rel="stylesheet" href="../electron/bucks-brand.css?v=1786692757">
+<link rel="stylesheet" href="../electron/a2ui-results.css?v=1786692757">
+<style>
+  body {
+    margin: 0;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    padding: 28px;
+  }
+  .h-bar {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 22px; flex-wrap: wrap;
+  }
+  .h-bar button {
+    font: inherit; font-size: 12px; padding: 6px 12px; cursor: pointer;
+    border-radius: 8px; border: 1px solid var(--border-subtle);
+    background: var(--input-bg); color: var(--text-primary);
+  }
+  .h-case { margin-bottom: 34px; }
+  .h-q {
+    font-size: 12px; color: var(--text-tertiary);
+    margin: 0 0 10px; font-family: 'IBM Plex Mono', monospace;
+  }
+  .h-variant-label {
+    font-size: 11px; color: var(--text-tertiary);
+    margin: 16px 0 7px; font-family: 'IBM Plex Mono', monospace;
+  }
+  /* Simulates the narrow right-hand column the panel really lives in. */
+  .h-narrow { max-width: 360px; }
+</style>
+<body data-theme="dark">
+
+<div class="h-bar">
+  <span id="brandslot"></span>
+  <button onclick="document.body.dataset.theme = document.body.dataset.theme==='dark'?'light':'dark'">
+    toggle theme
+  </button>
+  <button onclick="setAll('mosaic')">mosaic</button>
+  <button onclick="setAll('magazine')">magazine</button>
+  <button onclick="setAll('list')">list</button>
+  <button onclick="setAll('gallery')">gallery</button>
+  <button onclick="setAll(null)">auto</button>
+  <span id="stat" style="font-size:12px;color:var(--text-tertiary)"></span>
+</div>
+
+<div id="root"></div>
+
+<script src="../electron/bucks-brand.js?v=1786692757"></script>
+<script src="../electron/a2ui-results.js?v=1786692757"></script>
+<script src="./captures.js?v=1786692757"></script>
+<script>
+  window.__a2uiOpenTab = (u) => console.log('open', u);
+
+  // Which capture slugs to render, and whether to show a narrow variant.
+  const P = new URLSearchParams(location.search);
+  const SHOW = P.get('case') ? [P.get('case')] : null;
+  const FORCE = P.get('layout') || null;
+  const NARROW = P.get('narrow') === '1';
+  if (P.get('theme')) document.body.dataset.theme = P.get('theme');
+
+  function itemsFor(cap) {
+    const out = [];
+    (cap.events || []).forEach((ev) => {
+      if (ev.type === 'ui_component') {
+        out.push(...A2UIResults.normalize(ev.component, ev.data || {}));
+      }
+    });
+    return A2UIResults.dedupe(out);
+  }
+
+  let CASES = [];
+
+  function build(forceLayout) {
+    const root = document.getElementById('root');
+    root.innerHTML = '';
+    CASES = [];
+    let totalItems = 0, totalThumb = 0;
+
+    (window.CAPTURES || []).forEach((cap) => {
+      if (SHOW && !SHOW.includes(cap.slug)) return;
+      const items = itemsFor(cap);
+      if (!items.length) return;
+      totalItems += items.length;
+      totalThumb += items.filter(i => i.thumbnail).length;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'h-case';
+      const q = document.createElement('p');
+      q.className = 'h-q';
+      q.textContent = `[${cap.slug}] ${cap.query}`;
+      wrap.appendChild(q);
+
+      const auto = A2UIResults.pickLayout(items);
+      const lbl = document.createElement('div');
+      lbl.className = 'h-variant-label';
+      lbl.textContent = `full width — layout: ${forceLayout || auto + ' (auto)'}`;
+      wrap.appendChild(lbl);
+      wrap.appendChild(A2UIResults.render(items, {
+        title: 'Results', layout: forceLayout || undefined,
+      }));
+
+      if (!NARROW) { root.appendChild(wrap); CASES.push(cap.slug); return; }
+      // Same data in the narrow sidebar column, to catch container breakpoints.
+      const nl = document.createElement('div');
+      nl.className = 'h-variant-label';
+      nl.textContent = 'narrow column (360px)';
+      wrap.appendChild(nl);
+      const narrow = document.createElement('div');
+      narrow.className = 'h-narrow';
+      narrow.appendChild(A2UIResults.render(items, {
+        title: 'Results', layout: forceLayout || undefined,
+      }));
+      wrap.appendChild(narrow);
+
+      root.appendChild(wrap);
+      CASES.push(cap.slug);
+    });
+
+    document.getElementById('stat').textContent =
+      `${CASES.length} cases · ${totalItems} items · ${totalThumb} with thumbnails ` +
+      `(${Math.round(totalThumb / Math.max(totalItems,1) * 100)}%)`;
+  }
+
+  function setAll(layout) { build(layout); }
+
+  document.getElementById('brandslot').innerHTML =
+    BucksBrand.html({ context: 'layout harness', size: 'md' });
+  build(FORCE);
+</script>
+</body>

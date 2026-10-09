@@ -1,0 +1,129 @@
+/* Bucks — quiet local-AI surface
+   The reference establishes the visual rule: chrome is the product, and the
+   AI appears only when it has something useful to say. */
+
+body[data-theme="dark"] #bg-glow {
+  background:
+    radial-gradient(58% 54% at 50% 52%, rgba(255,255,255,.026), transparent 70%),
+    radial-gradient(45% 50% at 80% 94%, rgba(255,255,255,.025), transparent 76%),
+    #090a0c !important;
+}
+
+/* Restore the clean new-tab composition from the reference. The previous
+   command-center markup remains available but never competes with the mark. */
+#view-newtab {
+  display:flex !important;
+  position:relative;
+  width:100%; height:100% !important; min-height:0;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:0 0 calc(var(--agent-dock-clearance) + 58px) !important;
+  box-sizing:border-box;
+}
+#view-newtab.hidden,
+.dashboard-view.hidden {
+  display: none !important;
+}
+#view-newtab .ai-command-center,
+#view-newtab .ai-capability-grid,
+#view-newtab .nt-hero,
+#view-newtab .nt-dock-wrap,
+#view-newtab .nt-status-row,
+#view-newtab .nt-pending-zone { display:none !important; }
+
+#nt-brand { transform:translateY(-4vh); }
+.nt-brand-letter { font-size:clamp(34px, 4vw, 48px); }
+.nt-brand-tagline { font-size:11px; letter-spacing:.35em; }
+
+/* The fixed command bar mirrors the compact reference bar. */
+#global-agent-dock {
+  width:min(640px, calc(100vw - 48px)) !important;
+  gap:8px !important;
+  bottom:12px !important;
+  z-index:10000 !important;
+  opacity:1 !important;
+  pointer-events:none !important;
+}
+#global-agent-dock .composer-bar,
+#global-agent-dock .nt-ephemeral-zone,
+#global-agent-dock .composer-tray {
+  pointer-events:auto !important;
+}
+.composer-bar {
+  min-height:52px !important;
+  border-radius:26px !important;
+  padding:0 9px 0 16px !important;
+  background:rgba(24,25,29,.88) !important;
+  border-color:rgba(255,255,255,.20) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.09) !important;
+  backdrop-filter:blur(28px) saturate(1.3) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(1.3) !important;
+}
+.composer-bar:focus-within {
+  border-color:rgba(255,255,255,.36) !important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.055), 0 18px 45px rgba(0,0,0,.5) !important;
+}
+.composer-bar #nt-search-input { padding:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
+.composer-model-select { width:92px; color:rgba(255,255,255,.72); }
+.composer-model-dot { background:#ffffff !important; box-shadow:0 0 8px rgba(255,255,255,.72) !important; }
+.composer-actions .composer-send { background:transparent; color:rgba(255,255,255,.34); }
+.composer-bar:has(.composer-input:not(:placeholder-shown)) .composer-send { color:#fff; background:rgba(255,255,255,.1); }
+
+/* Ephemeral answer: a single restrained response sheet directly above the
+   bar. It has no dashboard chrome, so it feels temporary and page-aware. */
+#global-agent-dock .nt-ephemeral-zone.active { height:min(54vh, 520px) !important; }
+#global-agent-dock .nt-ephemeral-zone #nav-chat-panel {
+  padding:14px !important;
+  border-radius:20px !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  background:rgba(18,19,23,.95) !important;
+  box-shadow:0 24px 80px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(38px) saturate(1.35) !important;
+  -webkit-backdrop-filter:blur(38px) saturate(1.35) !important;
+}
+#nav-chat-header { min-height:28px; padding:0 2px 10px !important; border-bottom-color:rgba(255,255,255,.08) !important; }
+#nav-chat-header > span { font-size:12px !important; font-weight:650 !important; }
+#nav-chat-controls { padding:8px 2px !important; border-bottom-color:rgba(255,255,255,.07) !important; }
+#nav-chat-controls > div:first-child { gap:5px !important; }
+.nav-chat-checkbox-label { padding:3px 5px !important; border-color:transparent !important; background:transparent !important; }
+.nav-chat-checkbox-label:has(input:checked) { color:rgba(255,255,255,.78) !important; background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.09) !important; }
+#nav-chat-model-select { max-width:150px; background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.1) !important; border-radius:7px !important; }
+.nav-chat-hbtn { border-color:transparent !important; background:transparent !important; color:var(--text-tertiary) !important; }
+.nav-chat-hbtn:hover { background:rgba(255,255,255,.07) !important; color:var(--text-primary) !important; }
+.nav-chat-hbtn--primary { border-color:rgba(255,255,255,.11) !important; }
+
+#nav-chat-messages-container { gap:10px !important; padding:4px 4px 8px 0 !important; }
+/* Targets answers created by the streaming and standard response renderers.
+   This avoids turning the result into a bubble-heavy messaging UI. */
+#nav-chat-messages-container > div { animation:bucks-answer-in .2s cubic-bezier(.16,1,.3,1); }
+#nav-chat-messages-container .nx-token-body { font-size:14px !important; line-height:1.7 !important; }
+#nav-chat-messages-container .nx-token-body a { color:#ffffff !important; text-decoration:underline; }
+#nav-chat-messages-container > div > div { background:rgba(255,255,255,.035) !important; border-left-color:rgba(255,255,255,.4) !important; border-radius:0 12px 12px 0 !important; }
+.ephemeral-answer { padding:2px 0; }
+.ephemeral-answer-card { width:min(100%, 600px); border-left:2px solid rgba(255,255,255,.4) !important; }
+.ephemeral-answer-content { letter-spacing:-.005em; }
+.ephemeral-answer-content p:last-child { margin-bottom:0 !important; }
+.ephemeral-answer-card button { border-color:rgba(255,255,255,.13) !important; background:rgba(255,255,255,.035) !important; }
+.ephemeral-answer-card button:hover { background:rgba(255,255,255,.09) !important; }
+@keyframes bucks-answer-in { from { opacity:0; transform:translateY(7px) } to { opacity:1; transform:none } }
+
+#nav-chat-chips-container { justify-content:flex-start !important; margin:0 !important; padding:2px 0 0; }
+.nav-chat-chip { padding:6px 9px !important; border-radius:9px !important; background:transparent !important; color:var(--text-secondary) !important; font-size:11px !important; }
+.nav-chat-chip:hover { border-color:rgba(255,255,255,.2) !important; background:rgba(255,255,255,.06) !important; color:var(--text-primary) !important; }
+
+/* Model choice is available at the exact point of use. Its popover provides
+   download state and RAM fit feedback via the existing renderer model data. */
+.nt-model-picker { background:rgba(20,21,26,.97) !important; border-color:rgba(255,255,255,.16) !important; }
+.nt-model-row:hover { background:rgba(255,255,255,.06) !important; }
+
+@media (max-width:680px) {
+  #global-agent-dock { width:calc(100vw - 28px) !important; }
+  #nt-brand { transform:translateY(-10vh) scale(.9); }
+  #nav-chat-controls { align-items:flex-start !important; }
+  #nav-chat-controls > div:first-child { max-width:100%; }
+  .nav-chat-hbtn:not(.nav-chat-hbtn--icon) { font-size:0 !important; padding:5px !important; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #nav-chat-messages-container > div { animation:none; }
+}

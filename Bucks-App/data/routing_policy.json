@@ -1,0 +1,13 @@
+{
+  "slm": 0.5,
+  "browser": 0.5,
+  "wallet": 0.5,
+  "ipfs": 0.5,
+  "code": 0.5,
+  "commerce": 0.5,
+  "calendar": 0.5,
+  "deep_research": 0.1005,
+  "youtube_search": 0.3033,
+  "direct_answer": 0.1304,
+  "image_search": 0.4063
+}

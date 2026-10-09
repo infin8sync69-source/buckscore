@@ -99,6 +99,13 @@ func runNode(cmd *cobra.Command, _ []string) error {
 	if t, _ := cmd.Flags().GetInt("threads"); t > 0 {
 		cfg.Mining.Threads = t
 	}
+	if p, _ := cmd.Flags().GetInt("rpc-port"); p > 0 {
+		cfg.RPC.HTTPPort = p
+	}
+	if cmd.Flags().Changed("rpc") {
+		enabled, _ := cmd.Flags().GetBool("rpc")
+		cfg.RPC.Enabled = enabled
+	}
 
 	// ---- Logging ----
 	setupLogging(cfg.Logging.Level, cfg.Logging.Format)

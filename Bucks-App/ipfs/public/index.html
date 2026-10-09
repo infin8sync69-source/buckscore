@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bucks Files</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/brand/icons/32x32.png">
+<link rel="apple-touch-icon" sizes="128x128" href="/brand/icons/128x128.png">
+<style>
+  /* Bucks Files - Space theme premium styling */
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Sora:wght@400..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+  :root {
+    --bg: radial-gradient(circle at 50% 120%, #161922, #090a0f);
+    --panel-bg: rgba(22, 24, 33, 0.45);
+    --panel-alt: rgba(255, 255, 255, 0.02);
+    --header-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --dim: rgba(255, 255, 255, 0.45);
+    --focus-frame: rgba(169, 120, 255, 0.55);
+    --sel-bg: rgba(169, 120, 255, 0.12);
+    --cursor-bg: linear-gradient(135deg, rgba(169, 120, 255, 0.25), rgba(123, 63, 228, 0.2));
+    --cursor-text: #ffffff;
+    --dir-color: #a978ff;
+    --keybar-bg: rgba(0, 0, 0, 0.25);
+    --keybar-key: #a978ff;
+    --mono: "JetBrains Mono", "SF Mono", Menlo, Monaco, ui-monospace, monospace;
+    --sans: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.45 var(--sans);
+    display: flex; flex-direction: column;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbars matching Bucks Browser */
+  .list::-webkit-scrollbar, pre::-webkit-scrollbar, .dialog::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .list::-webkit-scrollbar-track, pre::-webkit-scrollbar-track, .dialog::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .list::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb, .dialog::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+  .list::-webkit-scrollbar-thumb:hover, pre::-webkit-scrollbar-thumb:hover, .dialog::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* top toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px; font-size: 13px;
+  }
+  .toolbar .conn { color: var(--dim); font-family: var(--sans); font-size: 12px; }
+  .toolbar .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ff4757; display: inline-block; margin-right: 6px;
+    box-shadow: 0 0 8px #ff4757;
+  }
+  .toolbar .dot.on {
+    background: #2ed573;
+    box-shadow: 0 0 8px #2ed573;
+  }
+  .toolbar .spacer { flex: 1; }
+  
+  .toolbar select, .toolbar input, #searchBox {
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: var(--sans);
+  }
+  .toolbar select:focus, .toolbar input:focus, #searchBox:focus {
+    border-color: rgba(169, 120, 255, 0.4);
+    box-shadow: 0 0 8px rgba(169, 120, 255, 0.15);
+  }
+  #searchBox.active {
+    border-color: #a978ff;
+  }
+
+  .toolbar button {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--sans);
+  }
+  .toolbar button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(169, 120, 255, 0.35);
+  }
+  .toolbar button:active {
+    transform: scale(0.98);
+  }
+
+  /* dual panes */
+  .panes {
+    flex: 1; display: flex; min-height: 0;
+    padding: 10px;
+    gap: 10px;
+    background: transparent;
+  }
+  .pane {
+    flex: 1; display: flex; flex-direction: column; min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  }
+  .pane.focused {
+    border-color: var(--focus-frame);
+    box-shadow: 0 0 20px rgba(169, 120, 255, 0.15), 0 20px 50px rgba(0, 0, 0, 0.25);
+  }
+  .pane .pathbar {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px 12px;
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .pane.focused .pathbar {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .pane .cols {
+    display: grid; grid-template-columns: 1fr 100px 140px;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pane .cols span {
+    padding: 6px 12px;
+    border-right: 1px solid var(--border);
+    transition: background 0.2s ease;
+  }
+  .pane .cols span:last-child { border-right: none; }
+
+  .pane .list {
+    flex: 1; overflow-y: auto; outline: none;
+    padding: 6px;
+  }
+  .row {
+    display: grid; grid-template-columns: 1fr 100px 140px;
+    cursor: default; font-size: 13px;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+  }
+  .row > span {
+    padding: 6px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center;
+  }
+  .row .sz, .row .dt {
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    justify-content: flex-end;
+  }
+  .row .nm {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .row.dir .nm {
+    color: var(--dir-color);
+  }
+  .row.dir .nm::before { content: "▸ "; color: rgba(169, 120, 255, 0.6); margin-right: 2px; }
+  
+  .row:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .row.selected {
+    background: rgba(169, 120, 255, 0.12);
+    border-color: rgba(169, 120, 255, 0.2);
+  }
+  .row.selected .nm, .row.selected .sz, .row.selected .dt {
+    color: #dfc8ff !important;
+  }
+  .pane.focused .row.cursor {
+    background: var(--cursor-bg);
+    border-color: rgba(169, 120, 255, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  .pane.focused .row.cursor .nm, .pane.focused .row.cursor .sz, .pane.focused .row.cursor .dt {
+    color: var(--cursor-text) !important;
+  }
+  .pane:not(.focused) .row.cursor {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .pane .status {
+    background: rgba(0, 0, 0, 0.12);
+    border-top: 1px solid var(--border);
+    padding: 6px 12px; font-size: 11px; color: var(--dim);
+    font-family: var(--mono);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* bottom function-key bar */
+  .keybar {
+    display: flex; gap: 6px; padding: 8px 10px;
+    background: var(--keybar-bg);
+    border-top: 1px solid var(--border);
+  }
+  .keybar div {
+    flex: 1; text-align: center; padding: 6px 4px; font-size: 11px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px; cursor: pointer; color: var(--dim);
+    transition: all 0.2s ease;
+    font-family: var(--sans);
+    font-weight: 500;
+  }
+  .keybar div:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text);
+    border-color: rgba(169, 120, 255, 0.25);
+  }
+  .keybar div:active {
+    transform: scale(0.97);
+  }
+  .keybar b {
+    color: var(--keybar-key); font-family: var(--mono); margin-right: 4px;
+    font-weight: 700;
+  }
+
+  /* dialogs */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(5, 5, 8, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+    transition: all 0.3s ease;
+  }
+  .overlay.show { display: flex; }
+  .dialog {
+    background: linear-gradient(155deg, rgba(30, 30, 36, 0.95), rgba(15, 15, 20, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    min-width: 460px; max-width: 80vw; max-height: 85vh; overflow: auto;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    animation: sheetIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .dialog h2 {
+    font-size: 14px; padding: 12px 18px;
+    font-family: var(--sans); font-weight: 700;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border);
+  }
+  .dialog .body { padding: 18px; font-size: 13px; }
+  .dialog .body input[type=text] {
+    width: 100%; background: rgba(0, 0, 0, 0.3); color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px; padding: 8px 12px; font: 13px var(--mono); outline: none;
+    transition: all 0.2s ease;
+  }
+  .dialog .body input[type=text]:focus {
+    border-color: rgba(169, 120, 255, 0.4);
+    box-shadow: 0 0 10px rgba(169, 120, 255, 0.2);
+  }
+  .dialog .btns {
+    display: flex; justify-content: flex-end; gap: 10px; padding: 12px 18px;
+    background: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--border);
+  }
+  .dialog .btns button {
+    background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px; padding: 6px 18px; font-size: 12.5px; cursor: pointer;
+    font-weight: 600; transition: all 0.2s ease;
+    font-family: var(--sans);
+  }
+  .dialog .btns button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(169, 120, 255, 0.3);
+  }
+  .dialog .btns button.primary {
+    background: #fff; border-color: #fff; color: #000;
+    font-weight: 700;
+  }
+  .dialog .btns button.primary:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  .dialog pre {
+    background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px;
+    padding: 14px; font: 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-all;
+    max-height: 55vh; overflow: auto; user-select: text;
+    color: #dfc8ff;
+  }
+  .dialog img { max-width: 100%; border-radius: 10px; }
+  .drop-hint {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(169, 120, 255, 0.08); border: 2px dashed rgba(169, 120, 255, 0.5); z-index: 5;
+    font-size: 20px; color: var(--text); pointer-events: none;
+    backdrop-filter: blur(4px);
+  }
+  body.dragover .drop-hint { display: flex; }
+  
+  /* Context Menu */
+  .ctx {
+    position: fixed; z-index: 200; display: none; min-width: 180px;
+    background: linear-gradient(155deg, rgba(35, 35, 42, 0.95), rgba(20, 20, 25, 0.95));
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 6px 0;
+    animation: fadeIn 0.15s ease both;
+  }
+  .ctx.show { display: block; }
+  .ctx div {
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+    font-family: var(--sans); font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.15s ease;
+  }
+  .ctx div:hover {
+    background: rgba(169, 120, 255, 0.2);
+    color: #fff;
+  }
+
+  .pathbar button.nav {
+    background: none; border: none; color: var(--dim); cursor: pointer;
+    font-size: 12px; padding: 0 4px; font-family: inherit;
+    transition: color 0.2s ease;
+  }
+  .pathbar button.nav:hover { color: var(--text); }
+  #xferText { color: #dfc8ff; font-weight: 600; font-family: var(--sans); font-size: 12px; }
+
+  /* pin status dot */
+  .pst {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle; flex: none;
+    box-shadow: 0 0 6px currentColor;
+  }
+  #peersText.warn { color: #ff4757; }
+
+  /* Grid/Tiles View Modes */
+  .pane .list.grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px; padding: 8px; align-content: start;
+  }
+  .pane .list.tiles {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px; padding: 8px; align-content: start;
+  }
+  .row.grid, .row.tiles {
+    display: flex; cursor: default;
+    border-radius: 8px; padding: 8px; border: 1px solid transparent;
+    margin-bottom: 0;
+  }
+  .row.grid { flex-direction: column; align-items: center; text-align: center; justify-content: center; }
+  .row.tiles { flex-direction: row; align-items: center; text-align: left; }
+  
+  .row.grid:hover, .row.tiles:hover { background: rgba(255, 255, 255, 0.03); }
+  .row.grid.selected, .row.tiles.selected { background: rgba(169, 120, 255, 0.12); border-color: rgba(169, 120, 255, 0.2); }
+  .pane.focused .row.grid.cursor, .pane.focused .row.tiles.cursor {
+    background: var(--cursor-bg); border-color: rgba(169, 120, 255, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+  .pane:not(.focused) .row.grid.cursor, .pane:not(.focused) .row.tiles.cursor {
+    background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .row.grid .icon { font-size: 36px; width: 48px; height: 48px; display:flex; align-items:center; justify-content:center; margin-bottom: 6px; }
+  .row.tiles .icon { font-size: 24px; width: 36px; height: 36px; display:flex; align-items:center; justify-content:center; margin-right: 8px; }
+  
+  .row.grid .nm { width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; }
+  .row.tiles .details { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+  .row.tiles .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; font-weight: 500; }
+  .row.tiles .sz, .row.tiles .dt { font-size: 10px; color: var(--dim); text-align: left; padding: 0; }
+  
+  .row .icon svg { width: 100%; height: 100%; fill: currentColor; }
+  .row:not(.grid):not(.tiles) .icon { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle; }
+  
+  /* Icon colors based on file types */
+  .row .icon.dir { color: #a978ff; }
+  .row .icon.image { color: #ff85c0; }
+  .row .icon.video { color: #ffc069; }
+  .row .icon.pdf { color: #ff7875; }
+  .row .icon.text { color: #5b8cff; }
+  .row .icon.file { color: #85a5ff; }
+  
+  /* Filter & Sort Headers */
+  .pane .cols span { cursor: pointer; user-select: none; }
+  .pane .cols span:hover { background: rgba(255,255,255,0.05); }
+  .pane .cols span.sort-asc::after { content: " ↑"; color: var(--keybar-key); }
+  .pane .cols span.sort-desc::after { content: " ↓"; color: var(--keybar-key); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body tabindex="0">
+
+<div class="toolbar">
+  <div style="display:inline-flex; align-items:center; gap:8px; margin-right:8px; user-select:none;">
+    <img src="/brand/icons/32x32.png" width="18" height="18" style="border-radius:4px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.5));" alt="Bucks" />
+    <span style="font-weight:700; font-size:13px; letter-spacing:-0.03em;">Bucks Files</span>
+  </div>
+  <span><span class="dot" id="dot"></span><span id="connText">ipfscluster://127.0.0.1:9094</span></span>
+  <span class="conn" id="peersText"></span>
+  <span class="conn" id="xferText"></span>
+  <span class="spacer"></span>
+  <select id="typeFilterBox" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px;font-size:12px">
+    <option value="">All Types</option>
+    <option value="image">Images</option>
+    <option value="video">Videos</option>
+    <option value="pdf">PDFs</option>
+    <option value="folder">Folders</option>
+  </select>
+    <input id="cidInput" placeholder="Open CID / ipfs:// path" style="background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font:12px var(--mono);outline:none;width:200px">
+  <input id="searchBox" placeholder="Search (⌘F)">
+  <div style="display:flex; border:1px solid var(--border); border-radius:5px; overflow:hidden">
+    <button onclick="setViewMode('list')" style="border:none; border-radius:0; padding:3px 8px">☰</button>
+    <button onclick="setViewMode('grid')" style="border:none; border-radius:0; padding:3px 8px; border-left:1px solid var(--border)">⊞</button>
+    <button onclick="setViewMode('tiles')" style="border:none; border-radius:0; padding:3px 8px; border-left:1px solid var(--border)">≣</button>
+  </div>
+  <button onclick="uploadDialog()">⇪ Add</button>
+  <button onclick="uploadFolderDialog()">⊞ Folder</button>
+  <button onclick="refreshBoth()">↻</button>
+</div>
+
+<div class="panes">
+  <div class="pane" id="pane0">
+    <div class="pathbar"></div>
+    <div class="cols"><span>Name</span><span style="text-align:right">Size</span><span style="text-align:right">Date Created</span></div>
+    <div class="list"></div>
+    <div class="status"></div>
+  </div>
+  <div class="pane" id="pane1">
+    <div class="pathbar"></div>
+    <div class="cols"><span>Name</span><span style="text-align:right">Size</span><span style="text-align:right">Date Created</span></div>
+    <div class="list"></div>
+    <div class="status"></div>
+  </div>
+</div>
+
+<div class="keybar">
+  <div onclick="kb(3)"><b>F3</b>View</div>
+  <div onclick="kb(4)"><b>F4</b>CID</div>
+  <div onclick="kb(5)"><b>F5</b>Download</div>
+  <div onclick="kb(6)"><b>F6</b>Rename</div>
+  <div onclick="kb(7)"><b>F7</b>Add Files</div>
+  <div onclick="kb(8)"><b>F8</b>Unpin</div>
+  <div onclick="kb(9)"><b>F9</b>Peers</div>
+  <div onclick="kb(10)"><b>F10</b>Refresh</div>
+</div>
+
+<div class="overlay" id="overlay"><div class="dialog" id="dialog"></div></div>
+<div class="ctx" id="ctx"></div>
+<div class="drop-hint">Drop files or folders to add &amp; pin to the cluster</div>
+<input type="file" id="fileInput" multiple hidden>
+<input type="file" id="dirInput" webkitdirectory hidden>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+// server.js proxy prefixes: /api -> cluster REST :9094, /kubo -> kubo API :5001
+const API = '/api';
+const KUBO = '/kubo';
+
+const ICONS = {
+  folder: '<svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+  image: '<svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+  video: '<svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>',
+  text: '<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm6 7V3.5L18.5 9H12z"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM16.5 9h-1v1.5h1V9z"/><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>'
+};
+
+function getIcon(e) {
+  if (e.dir) return ICONS.folder;
+  const n = e.name.toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return ICONS.image;
+  if (/\.(mp4|webm|ogg|mov)$/.test(n)) return ICONS.video;
+  if (/\.pdf$/.test(n)) return ICONS.pdf;
+  if (/\.(txt|md|js|html|css|json|csv)$/.test(n)) return ICONS.text;
+  return ICONS.file;
+}
+
+function getIconClass(e) {
+  if (e.dir) return 'dir';
+  const n = e.name.toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return 'image';
+  if (/\.(mp4|webm|ogg|mov)$/.test(n)) return 'video';
+  if (/\.pdf$/.test(n)) return 'pdf';
+  if (/\.(txt|md|js|html|css|json|csv)$/.test(n)) return 'text';
+  return 'file';
+}
+
+// Worst status across the peer_map of a GlobalPinInfo: error > pinning/queued > remote > pinned.
+function pinStatusOf(p) {
+  const sts = Object.values(p.peer_map || {}).map((v) => v.status || 'unknown');
+  if (!sts.length) return 'unknown';
+  if (sts.some((s) => /error|unexpected/.test(s))) return 'error';
+  if (sts.some((s) => /pinning|queued|unpinning/.test(s))) return 'pinning';
+  if (sts.every((s) => s === 'remote')) return 'remote';
+  if (sts.some((s) => s === 'pinned')) return 'pinned';
+  return sts[0];
+}
+const PIN_DOT = { pinned: '#43c478', pinning: '#e0b454', error: '#e05555', remote: '#8a90a0', unknown: '#8a90a0' };
+function pinDot(e) {
+  if (!e.pin || !e.pinStatus) return '';
+  const c = PIN_DOT[e.pinStatus] || PIN_DOT.unknown;
+  return `<span class="pst" title="pin status: ${e.pinStatus}" style="background:${c}"></span>`;
+}
+
+function setViewMode(mode) {
+  panes.forEach(p => { p.viewMode = mode; p.render(); });
+}
+
+const fmtSize = (n) => {
+  if (n == null || n < 0) return '—';
+  if (n < 1024) return String(n);
+  const u = ['K','M','G','T']; let i = -1;
+  while (n >= 1024 && i < 3) { n /= 1024; i++; }
+  return n.toFixed(n >= 10 ? 0 : 1) + ' ' + u[i];
+};
+const fmtDate = (t) => {
+  if (!t) return '—';
+  const d = new Date(t);
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+};
+
+async function ndjson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('http ' + r.status);
+  const text = await r.text();
+  try { const j = JSON.parse(text); return Array.isArray(j) ? j : [j]; }
+  catch { return text.trim().split('\n').filter(Boolean).map((l) => JSON.parse(l)); }
+}
+
+
+async function ipfsPatch(dirCid, name, itemCid, remove=false) {
+  if (remove) {
+    const r = await fetch(`${KUBO}/api/v0/object/patch/rm-link?arg=${dirCid}&arg=${encodeURIComponent(name)}`, {method:'POST'});
+    const j = await r.json(); return j.Hash;
+  } else {
+    const rmR = await fetch(`${KUBO}/api/v0/object/patch/rm-link?arg=${dirCid}&arg=${encodeURIComponent(name)}`, {method:'POST'});
+    let cleanDir = dirCid;
+    if (rmR.ok) { const j = await rmR.json(); if (j.Hash) cleanDir = j.Hash; }
+    const r2 = await fetch(`${KUBO}/api/v0/object/patch/add-link?arg=${cleanDir}&arg=${encodeURIComponent(name)}&arg=${itemCid}`, {method:'POST'});
+    const j2 = await r2.json(); return j2.Hash;
+  }
+}
+
+async function updatePathTree(pane, leafCid) {
+  let currentCid = leafCid;
+  for (let i = pane.path.length - 1; i >= 1; i--) {
+    const parent = pane.path[i-1];
+    const childName = pane.path[i].name;
+    currentCid = await ipfsPatch(parent.cid, childName, currentCid, false);
+    pane.path[i].cid = currentCid; 
+  }
+  const oldRootCid = pane.path[0].cid;
+  const rootName = pane.path[0].name;
+  await fetch(`${API}/pins/${currentCid}?name=${encodeURIComponent(rootName)}`, {method:'POST'});
+  await fetch(`${API}/pins/${oldRootCid}`, {method:'DELETE'});
+  pane.path[0].cid = currentCid;
+}
+
+async function performCopyMove(sourceItem, targetPane, targetFolderEntry, action) {
+  setXfer(`\u21EA ${action}ing ${sourceItem.name}...`);
+  try {
+    if (targetFolderEntry) {
+      const newDir = await ipfsPatch(targetFolderEntry.cid, sourceItem.name, sourceItem.cid, false);
+      if (targetPane.path.length === 0) {
+        await fetch(`${API}/pins/${newDir}?name=${encodeURIComponent(targetFolderEntry.name)}`, {method:'POST'});
+        await fetch(`${API}/pins/${targetFolderEntry.cid}`, {method:'DELETE'});
+      } else {
+        const newParent = await ipfsPatch(targetPane.path[targetPane.path.length-1].cid, targetFolderEntry.name, newDir, false);
+        await updatePathTree(targetPane, newParent);
+      }
+    } else {
+      if (targetPane.path.length === 0) {
+        await fetch(`${API}/pins/${sourceItem.cid}?name=${encodeURIComponent(sourceItem.name)}`, {method:'POST'});
+      } else {
+        const newDir = await ipfsPatch(targetPane.path[targetPane.path.length-1].cid, sourceItem.name, sourceItem.cid, false);
+        await updatePathTree(targetPane, newDir);
+      }
+    }
+    
+    if (action === 'move') {
+      const sourcePane = panes[sourceItem.paneId];
+      if (sourceItem.isRoot) {
+        await fetch(`${API}/pins/${sourceItem.cid}`, {method:'DELETE'});
+      } else {
+        const newDir = await ipfsPatch(sourcePane.path[sourcePane.path.length-1].cid, sourceItem.name, null, true);
+        await updatePathTree(sourcePane, newDir);
+      }
+    }
+  } catch(e) { console.error(e); }
+  setXfer('');
+  refreshBoth();
+}
+
+// ---- pane model -------------------------------------------------------------------------------
+// path: [] = cluster root (the pinset). Deeper: [{name, cid}, ...]
+class Pane {
+  constructor(el) {
+    this.el = el;
+    this.path = [];
+    this.entries = [];
+    this.cursor = 0;
+    this.selected = new Set();
+    this.hist = [];
+    this.all = [];
+    this.filter = '';
+    this.viewMode = 'list';
+    this.sortField = 'name';
+    this.sortAsc = true;
+  }
+  pathString() {
+    return '/' + this.path.map((p) => p.name).join('/') + (this.path.length ? '/' : '');
+  }
+  cidPath() { // ipfs path for current dir, '' at root
+    if (!this.path.length) return '';
+    return this.path[0].cid + this.path.slice(1).map((p) => '/' + p.name).join('');
+  }
+  async load(keepCursor=false) {
+    const old = keepCursor ? this.entries[this.cursor]?.name : null;
+    try {
+      if (!this.path.length) {
+        const pins = await ndjson('/api/pins');
+        const sizes = await Promise.all(pins.map((p) => statCid(typeof p.cid === 'string' ? p.cid : p.cid['/'])));
+        this.all = pins.map((p, i) => {
+          const cid = typeof p.cid === 'string' ? p.cid : p.cid['/'];
+          return {
+            name: p.name && !p.name.includes('/') ? p.name : cid,
+            cid,
+            dir: sizes[i]?.dir ?? false,
+            size: sizes[i]?.size ?? -1,
+            date: p.created ? Date.parse(p.created) : 0,
+            pin: true,
+            pinStatus: pinStatusOf(p),
+          };
+        }).sort((a, b) => (b.dir - a.dir) || a.name.localeCompare(b.name));
+      }
+      else {
+        const r = await fetch('/kubo/api/v0/ls?arg=' + encodeURIComponent(this.cidPath()), { method: 'POST' });
+        const j = await r.json();
+        const links = j.Objects?.[0]?.Links || [];
+        this.all = links.map((l) => ({
+          name: l.Name, cid: l.Hash, dir: l.Type === 1, size: l.Type === 1 ? -1 : l.Size, date: 0, pin: false,
+        })).sort((a, b) => (b.dir - a.dir) || a.name.localeCompare(b.name));
+        this.all.unshift({ name: '..', up: true, dir: true, size: -1, date: 0 });
+      }
+      $('#dot').classList.add('on');
+    } catch (e) {
+      this.all = [];
+      $('#dot').classList.remove('on');
+    }
+    this.applyFilter();
+    this.selected.clear();
+    this.cursor = Math.max(0, old ? this.entries.findIndex((e) => e.name === old) : 0);
+    if (this.cursor === -1) this.cursor = 0;
+    this.render();
+  }
+  cur() { return this.entries[this.cursor]; }
+  render() {
+    const pb = $('.pathbar', this.el);
+    pb.innerHTML = `<button class="nav" title="Back">←</button><button class="nav" title="Up">↑</button><button class="nav" title="Home">⌂</button><span></span>`;
+    pb.lastChild.textContent = ' ipfs-cluster:' + this.pathString();
+    const [bBack, bUp, bHome] = pb.querySelectorAll('button');
+    bBack.onclick = () => { focusPane(this); this.back(); };
+    bUp.onclick = () => { focusPane(this); this.up(); };
+    bHome.onclick = () => { focusPane(this); this.home(); };
+    
+    // Sort headers
+    const cols = $('.cols', this.el);
+    cols.innerHTML = `<span data-sort="name">Name</span><span data-sort="size" style="text-align:right">Size</span><span data-sort="date" style="text-align:right">Date Created</span>`;
+    [...cols.children].forEach(c => {
+      const f = c.getAttribute('data-sort');
+      if (this.sortField === f) c.className = this.sortAsc ? 'sort-asc' : 'sort-desc';
+      c.onclick = () => {
+        if (this.sortField === f) this.sortAsc = !this.sortAsc;
+        else { this.sortField = f; this.sortAsc = f==='name'; }
+        this.applyFilter();
+        this.render();
+      };
+    });
+
+    const list = $('.list', this.el);
+    list.ondragover = (ev) => ev.preventDefault();
+    list.ondrop = async (ev) => {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData('text/plain');
+      if (!data) return;
+      try {
+        const item = JSON.parse(data);
+        if (item.internalDrop) {
+          ev.stopPropagation();
+          if (item.paneId === panes.indexOf(this) && item.pathJson === JSON.stringify(this.path)) return;
+          await performCopyMove(item, this, null, ev.shiftKey ? 'copy' : 'move');
+        }
+      } catch(e) {}
+    };
+    list.className = 'list ' + this.viewMode;
+    list.innerHTML = '';
+    
+    this.entries.forEach((e, i) => {
+      const row = document.createElement('div');
+      if (!e.up) {
+        row.draggable = true;
+        row.ondragstart = (ev) => {
+          ev.dataTransfer.setData('text/plain', JSON.stringify({
+            internalDrop: true, cid: e.cid, name: e.name, 
+            paneId: panes.indexOf(this), isRoot: this.path.length===0,
+            pathJson: JSON.stringify(this.path)
+          }));
+        };
+      }
+      if (e.dir && !e.up) {
+        row.ondragover = (ev) => { ev.preventDefault(); row.style.background = 'rgba(255,255,255,0.2)'; };
+        row.ondragleave = (ev) => { row.style.background = ''; };
+        row.ondrop = async (ev) => {
+          ev.preventDefault(); ev.stopPropagation();
+          row.style.background = '';
+          const data = ev.dataTransfer.getData('text/plain');
+          if (!data) return;
+          try {
+            const item = JSON.parse(data);
+            if (item.internalDrop) {
+              await performCopyMove(item, this, e, ev.shiftKey ? 'copy' : 'move');
+            }
+          } catch(err) {}
+        };
+      }
+
+      row.className = 'row ' + this.viewMode + (e.dir ? ' dir' : ' f') + (e.up ? ' up' : '') +
+        (i === this.cursor ? ' cursor' : '') + (this.selected.has(i) ? ' selected' : '');
+      
+      const iconHTML = `<span class="icon ${e.up ? 'dir' : getIconClass(e)}">${e.up ? ICONS.folder : getIcon(e)}</span>`;
+      
+      if (this.viewMode === 'list') {
+        row.innerHTML = `<span style="display:flex;align-items:center;min-width:0">${iconHTML}<span class="nm" style="overflow:hidden;text-overflow:ellipsis">${pinDot(e)}</span></span><span class="sz"></span><span class="dt"></span>`;
+        row.children[0].querySelector('.nm').appendChild(document.createTextNode(e.up ? '..' : e.name));
+        row.children[1].textContent = e.dir ? (e.up ? 'Up' : 'Folder') : fmtSize(e.size);
+        row.children[2].textContent = fmtDate(e.date);
+      } else if (this.viewMode === 'grid') {
+        // optionally load actual thumbnail here if image, but sticking to icons to save memory/data
+        row.innerHTML = `${iconHTML}<span class="nm" title="${e.name.replace(/"/g,'&quot;')}">${e.up ? '..' : e.name}</span>`;
+      } else { // tiles
+        row.innerHTML = `${iconHTML}<div class="details"><span class="nm" title="${e.name.replace(/"/g,'&quot;')}">${e.up ? '..' : e.name}</span>
+          <span class="sz">${pinDot(e)}${e.dir ? (e.up?'':'Folder') : fmtSize(e.size)}</span>
+          <span class="dt">${fmtDate(e.date)}</span></div>`;
+      }
+      
+      row.onclick = () => { focusPane(this); this.cursor = i; this.render(); };
+      row.ondblclick = () => { focusPane(this); this.cursor = i; this.enter(); };
+      row.oncontextmenu = (ev) => { ev.preventDefault(); focusPane(this); this.cursor = i; this.render(); ctxMenu(ev, e); };
+      list.appendChild(row);
+    });
+    
+    const files = this.entries.filter((e) => !e.dir).length;
+    const dirs = this.entries.filter((e) => e.dir && !e.up).length;
+    const bytes = this.entries.reduce((a, e) => a + Math.max(0, e.size), 0);
+    $('.status', this.el).textContent =
+      `${files} files, ${dirs} folders · ${fmtSize(bytes)}B` + (this.selected.size ? ` · ${this.selected.size} selected` : '') +
+      (this.filter || typeFilterBox.value ? ` · filtered (${this.all.length - this.entries.length} hidden)` : '');
+    const c = $('.row.cursor', this.el);
+    if (c) c.scrollIntoView({ block: 'nearest' });
+  }
+  async enter() {
+    const e = this.cur();
+    if (!e) return;
+    if (e.up) { await this.up(); return; }
+    if (e.dir) { await this.go([...this.path, { name: e.name, cid: e.cid }]); return; }
+    viewFile(e); // Enter on a file = view, like NC's preview
+  }
+  applyFilter() {
+    const q = this.filter.toLowerCase();
+    const typeFilt = typeFilterBox.value;
+    let list = this.all;
+    if (q) list = list.filter((e) => e.up || e.name.toLowerCase().includes(q) || (e.cid || '').toLowerCase().includes(q));
+    if (typeFilt) {
+      list = list.filter((e) => {
+        if (e.up) return true;
+        if (typeFilt === 'folder') return e.dir;
+        const n = e.name.toLowerCase();
+        if (typeFilt === 'image') return /\.(png|jpe?g|gif|webp|svg)$/.test(n);
+        if (typeFilt === 'video') return /\.(mp4|webm|ogg|mov)$/.test(n);
+        if (typeFilt === 'pdf') return /\.pdf$/.test(n);
+        return true;
+      });
+    }
+    
+    // Sort
+    const s = this.sortField;
+    const a = this.sortAsc ? 1 : -1;
+    list.sort((x, y) => {
+      if (x.up) return -1; if (y.up) return 1;
+      if (x.dir !== y.dir) return x.dir ? -1 : 1; // folders always first
+      if (s === 'name') return x.name.localeCompare(y.name) * a;
+      if (s === 'size') return (x.size - y.size) * a;
+      if (s === 'date') return (x.date - y.date) * a;
+      return 0;
+    });
+    this.entries = list;
+  }
+  setFilter(q) {
+    this.filter = q;
+    this.applyFilter();
+    this.cursor = 0;
+    this.selected.clear();
+    this.render();
+  }
+  async go(p) { this.hist.push(this.path.slice()); this.path = p; await this.load(); }
+  async back() { if (this.hist.length) { this.path = this.hist.pop(); await this.load(); } }
+  async up() { if (this.path.length) await this.go(this.path.slice(0, -1)); }
+  async home() { if (this.path.length) await this.go([]); }
+  move(d) {
+    this.cursor = Math.min(this.entries.length - 1, Math.max(0, this.cursor + d));
+    this.render();
+  }
+}
+
+const statCache = {};
+async function statCid(cid) {
+  if (statCache[cid]) return statCache[cid];
+  try {
+    const r = await fetch('/kubo/api/v0/files/stat?arg=' + encodeURIComponent('/ipfs/' + cid), { method: 'POST' });
+    const j = await r.json();
+    return (statCache[cid] = { dir: j.Type === 'directory', size: j.Type === 'directory' ? -1 : j.Size });
+  } catch { return null; }
+}
+
+const panes = [new Pane($('#pane0')), new Pane($('#pane1'))];
+let active = 0;
+function focusPane(p) { active = panes.indexOf(p); panes.forEach((q, i) => q.el.classList.toggle('focused', i === active)); }
+function pane() { return panes[active]; }
+function refreshBoth() { panes.forEach((p) => p.load(true)); loadPeers(); }
+
+// ---- dialogs ----------------------------------------------------------------------------------
+function dialog(html) {
+  $('#dialog').innerHTML = html;
+  $('#overlay').classList.add('show');
+}
+function closeDialog() { $('#overlay').classList.remove('show'); document.body.focus(); }
+$('#overlay').onclick = (e) => { if (e.target === $('#overlay')) closeDialog(); };
+
+function gatewayURL(e, p) {
+  const base = p.cidPath();
+  const ipfsPath = e.pin ? e.cid : base + '/' + e.name;
+  return `/ipfs/${ipfsPath}?filename=${encodeURIComponent(e.name)}`;
+}
+
+async function viewFile(e) {
+  const p = pane();
+  if (!e || e.dir) return;
+  const url = gatewayURL(e, p);
+  const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(e.name);
+  if (isImg) {
+    dialog(`<h2>${e.name}</h2><div class="body"><img src="${url}"></div>
+      <div class="btns"><button class="primary" onclick="closeDialog()">Close (Esc)</button></div>`);
+    return;
+  }
+
+  try {
+    const headReq = await fetch(url, { method: 'HEAD' });
+    const contentType = headReq.headers.get('content-type') || '';
+    
+    if (contentType.startsWith('video/') || /\.(mp4|webm|ogg|mov)$/i.test(e.name)) {
+      dialog(`<h2>${e.name}</h2><div class="body" style="text-align:center"><video src="${url}" controls autoplay style="max-width:100%;max-height:60vh;"></video></div>
+        <div class="btns"><button class="primary" onclick="closeDialog()">Close (Esc)</button></div>`);
+      return;
+    }
+    
+    if (contentType === 'application/pdf' || /\.pdf$/i.test(e.name)) {
+      dialog(`<h2>${e.name}</h2><div class="body"><iframe src="${url}" style="width:100%;height:65vh;border:none;"></iframe></div>
+        <div class="btns"><button class="primary" onclick="closeDialog()">Close (Esc)</button></div>`);
+      return;
+    }
+  } catch (err) {
+    console.error("HEAD request failed:", err);
+  }
+  const r = await fetch(url);
+  const blob = await r.blob();
+  if (blob.size > 512 * 1024) {
+    dialog(`<h2>${e.name}</h2><div class="body">File is ${fmtSize(blob.size)}B — too large to preview. Use F5 to download.</div>
+      <div class="btns"><button class="primary" onclick="closeDialog()">Close (Esc)</button></div>`);
+    return;
+  }
+  const text = await blob.text();
+  const pre = document.createElement('pre');
+  pre.textContent = text;
+  dialog(`<h2>${e.name} — ${fmtSize(blob.size)}B</h2><div class="body"></div>
+    <div class="btns"><button class="primary" onclick="closeDialog()">Close (Esc)</button></div>`);
+  $('#dialog .body').appendChild(pre);
+}
+
+function cidDialog(e) {
+  if (!e) return;
+  dialog(`<h2>Content Identifier</h2><div class="body"><pre>${e.cid || '—'}</pre></div>
+    <div class="btns">
+      <button onclick="navigator.clipboard.writeText('${e.cid}'); closeDialog()">Copy</button>
+      <button class="primary" onclick="closeDialog()">Close</button>
+    </div>`);
+}
+
+function download(e) {
+  if (!e || e.dir) return;
+  const a = document.createElement('a');
+  a.href = gatewayURL(e, pane()) + '&download=true';
+  a.download = e.name;
+  a.click();
+}
+
+function renameDialog(e) {
+  const p = pane();
+  if (!e || !e.pin) { return; } // only pins (root entries) can be renamed
+  dialog(`<h2>Rename pin</h2><div class="body">
+      <input type="text" id="rnInput" value="${e.name.replace(/"/g,'&quot;')}">
+    </div>
+    <div class="btns">
+      <button onclick="closeDialog()">Cancel</button>
+      <button class="primary" id="rnOk">Rename</button>
+    </div>`);
+  const input = $('#rnInput');
+  input.focus(); input.select();
+  const go = async () => {
+    const name = input.value.trim();
+    if (name && name !== e.name)
+      await fetch(`/api/pins/${e.cid}?name=${encodeURIComponent(name)}`, { method: 'POST' });
+    closeDialog();
+    refreshBoth();
+  };
+  $('#rnOk').onclick = go;
+  input.onkeydown = (ev) => { if (ev.key === 'Enter') go(); if (ev.key === 'Escape') closeDialog(); };
+}
+
+function unpinDialog() {
+  const p = pane();
+  const targets = p.selected.size ? [...p.selected].map((i) => p.entries[i]) : [p.cur()];
+  const pins = targets.filter((e) => e && e.pin);
+  if (!pins.length) return;
+  dialog(`<h2>Unpin</h2><div class="body">
+      Unpin ${pins.length === 1 ? `"${pins[0].name}"` : pins.length + ' items'} from the cluster?<br>
+      <span style="color:var(--dim)">The content is removed from cluster storage on garbage collection.</span>
+    </div>
+    <div class="btns">
+      <button onclick="closeDialog()">Cancel</button>
+      <button class="primary" id="rmOk">Unpin (Enter)</button>
+    </div>`);
+  const go = async () => {
+    for (const e of pins) await fetch(`/api/pins/${e.cid}`, { method: 'DELETE' });
+    closeDialog();
+    refreshBoth();
+  };
+  $('#rmOk').onclick = go;
+  window._confirmAction = go;
+}
+
+async function loadPeers() {
+  try {
+    const peers = await ndjson('/api/peers');
+    const bad = peers.filter((p) => p.error || !p.ipfs?.id);
+    const t = $('#peersText');
+    t.textContent = peers.length + ' peer' + (peers.length > 1 ? 's' : '') + ' · ' +
+      peers.map((p) => p.peername + (p.error || !p.ipfs?.id ? ' ⚠' : '')).join(', ') +
+      (bad.length ? ` · ${bad.length} unhealthy` : '');
+    t.classList.toggle('warn', bad.length > 0);
+    t.title = bad.length ? bad.map((p) => `${p.peername}: ${p.error || 'ipfs daemon unreachable'}`).join('\n') : 'all peers healthy';
+    window._peers = peers;
+  } catch { $('#peersText').textContent = ''; }
+}
+
+function peersDialog() {
+  const peers = window._peers || [];
+  const me = peers[0];
+  let join = '';
+  if (me) {
+    const addr = (me.addresses || []).find((a) => /\/ip4\/(?!127\.)\d+/.test(a)) || (me.addresses || [])[0] || '';
+    join = `<h2 style="border-top:1px solid var(--border)">Add a new peer</h2><div class="body">
+      <div style="color:var(--dim);margin-bottom:8px">On the new machine: install kubo + ipfs-cluster, run
+      <code>ipfs init</code> and <code>ipfs-cluster-service init</code>, copy the <b>secret</b> from this machine's
+      <code>~/.ipfs-cluster/service.json</code> into the same file there, then run:</div>
+      <pre id="joinCmd">ipfs daemon &
+ipfs-cluster-service daemon --bootstrap ${addr}</pre>
+    </div>`;
+  }
+  dialog(`<h2>Cluster peers</h2><div class="body"><pre>${peers.map((p) =>
+    `${p.peername}\n  ${p.id}\n  ipfs: ${p.ipfs?.id || '?'}${p.error ? '\n  error: ' + p.error : ''}`).join('\n\n') || 'unavailable'}</pre></div>
+    ${join}
+    <div class="btns">
+      ${join ? `<button onclick="navigator.clipboard.writeText($('#joinCmd').textContent)">Copy join command</button>` : ''}
+      <button class="primary" onclick="closeDialog()">Close (Esc)</button>
+    </div>`);
+}
+
+// local=true: ingest into the receiving peer's IPFS first and return immediately,
+// then replicate/pin to other peers in the background — much faster uploads.
+const ADDURL = (n) => `/api/add?name=${encodeURIComponent(n)}&stream-channels=false&local=true`;
+
+// ---- context menu -----------------------------------------------------------------------------
+function ctxMenu(ev, e) {
+  const items = [
+    !e.dir && ['View', () => viewFile(e)],
+    e.dir && ['Open', () => pane().enter()],
+    ['Show CID', () => cidDialog(e)],
+    ['Copy link', () => navigator.clipboard.writeText(new URL(gatewayURL(e, pane()), location.href).href)],
+    !e.dir && ['Download', () => download(e)],
+    e.pin && ['Rename\u2026', () => renameDialog(e)],
+    e.pin && ['Unpin\u2026', () => unpinDialog()],
+  ].filter(Boolean);
+  const m = $('#ctx');
+  m.innerHTML = '';
+  for (const [t, fn] of items) {
+    const d = document.createElement('div');
+    d.textContent = t;
+    d.onclick = () => { hideCtx(); fn(); };
+    m.appendChild(d);
+  }
+  m.style.left = Math.min(ev.pageX, innerWidth - 200) + 'px';
+  m.style.top = Math.min(ev.pageY, innerHeight - items.length * 26 - 10) + 'px';
+  m.classList.add('show');
+}
+function hideCtx() { $('#ctx').classList.remove('show'); }
+window.addEventListener('click', hideCtx);
+window.addEventListener('blur', hideCtx);
+
+function setXfer(t) { $('#xferText').textContent = t; }
+function xhrUpload(url, fd, label) {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.upload.onprogress = (ev) => {
+      if (ev.lengthComputable) setXfer(`\u21EA ${label} \u2014 ${Math.round(ev.loaded / ev.total * 100)}%`);
+    };
+    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
+    xhr.onerror = () => resolve(false);
+    xhr.send(fd);
+  });
+}
+
+// ---- upload -----------------------------------------------------------------------------------
+function uploadDialog() { $('#fileInput').click(); }
+function uploadFolderDialog() { $('#dirInput').click(); }
+$('#fileInput').onchange = (e) => { uploadEntries([...e.target.files].map((f) => ({ file: f, rel: f.name }))); e.target.value = ''; };
+$('#dirInput').onchange = (e) => { uploadEntries([...e.target.files].map((f) => ({ file: f, rel: f.webkitRelativePath || f.name }))); e.target.value = ''; };
+
+// items: [{file, rel}] where rel may contain '/' for files inside folders.
+// Loose files become one pin each; each top-level folder becomes a single recursive pin.
+async function uploadEntries(items) {
+  if (!items.length) return;
+  const groups = new Map();
+  for (const it of items) {
+    const top = it.rel.includes('/') ? it.rel.split('/')[0] : '';
+    if (!groups.has(top)) groups.set(top, []);
+    groups.get(top).push(it);
+  }
+  for (const [top, list] of groups) {
+    if (top === '') {
+      for (const it of list) {
+        const fd = new FormData();
+        fd.append('file', it.file, it.file.name);
+        await xhrUpload(ADDURL(it.file.name), fd, it.file.name);
+      }
+    }
+    else {
+      const fd = new FormData();
+      for (const it of list) fd.append('file', it.file, it.rel);
+      await xhrUpload(ADDURL(top) + '&wrap-with-directory=false', fd, top + '/');
+    }
+  }
+  setXfer('\u2713 added');
+  setTimeout(() => setXfer(''), 3000);
+  refreshBoth();
+}
+
+async function entryToItems(entry, prefix) {
+  if (entry.isFile) {
+    const file = await new Promise((res, rej) => entry.file(res, rej));
+    return [{ file, rel: prefix + entry.name }];
+  }
+  if (entry.isDirectory) {
+    const reader = entry.createReader();
+    const out = [];
+    while (true) {
+      const batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+      if (!batch.length) break;
+      for (const e of batch) out.push(...await entryToItems(e, prefix + entry.name + '/'));
+    }
+    return out;
+  }
+  return [];
+}
+let dragDepth = 0;
+window.addEventListener('dragenter', (e) => {
+  if (e.dataTransfer.types && e.dataTransfer.types.includes('Files') && !e.dataTransfer.types.includes('text/plain')) {
+    if (dragDepth++ === 0) document.body.classList.add('dragover');
+  }
+});
+window.addEventListener('dragleave', (e) => { 
+  if (e.dataTransfer.types && e.dataTransfer.types.includes('Files') && !e.dataTransfer.types.includes('text/plain')) {
+    if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragover'); } 
+  }
+});
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', async (e) => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragover');
+  if (e.dataTransfer.types && e.dataTransfer.types.includes('text/plain')) return; // handled by internal drops
+  const entries = [...(e.dataTransfer.items || [])].map((i) => i.webkitGetAsEntry?.()).filter(Boolean);
+  if (entries.length) {
+    const items = [];
+    for (const en of entries) items.push(...await entryToItems(en, ''));
+    uploadEntries(items);
+  }
+  else if (e.dataTransfer.files.length) {
+    uploadEntries([...e.dataTransfer.files].map((f) => ({ file: f, rel: f.name })));
+  }
+});
+
+let clipBoard = null;
+
+// ---- keyboard ---------------------------------------------------------------------------------
+function kb(n) {
+  const p = pane();
+  if (n === 3) viewFile(p.cur());
+  if (n === 4) cidDialog(p.cur());
+  if (n === 5) download(p.cur());
+  if (n === 6) renameDialog(p.cur());
+  if (n === 7) uploadDialog();
+  if (n === 8) unpinDialog();
+  if (n === 9) peersDialog();
+  if (n === 10) refreshBoth();
+}
+document.body.addEventListener('keydown', (e) => {
+  if ($('#overlay').classList.contains('show')) {
+    if (e.key === 'Escape') closeDialog();
+    if (e.key === 'Enter' && window._confirmAction) { const a = window._confirmAction; window._confirmAction = null; a(); }
+    return;
+  }
+  const p = pane();
+  const k = e.key;
+  if ((k === 'f' && (e.metaKey || e.ctrlKey)) || k === '/') { e.preventDefault(); focusSearch(); return; }
+  if (k === 'Escape' && p.filter) { p.setFilter(''); searchBox.value = ''; searchBox.classList.remove('active'); return; }
+  if (k === 'Tab') { e.preventDefault(); focusPane(panes[1 - active]); searchBox.value = pane().filter; searchBox.classList.toggle('active', !!pane().filter); }
+  else if (k === 'ArrowDown') { e.preventDefault(); p.move(1); }
+  else if (k === 'ArrowUp') { e.preventDefault(); p.move(-1); }
+  else if (k === 'PageDown') { e.preventDefault(); p.move(20); }
+  else if (k === 'PageUp') { e.preventDefault(); p.move(-20); }
+  else if (k === 'Home') { e.preventDefault(); p.cursor = 0; p.render(); }
+  else if (k === 'End') { e.preventDefault(); p.cursor = p.entries.length - 1; p.render(); }
+  else if (k === 'Enter') { e.preventDefault(); p.enter(); }
+  else if (k === 'Backspace') { e.preventDefault(); p.up(); }
+  else if (k === 'ArrowLeft') { e.preventDefault(); p.back(); }
+  else if (k === 'ArrowRight') { e.preventDefault(); if (p.cur()?.dir) p.enter(); }
+  else if (k === ' ') { // space = toggle selection, NC-style
+    e.preventDefault();
+    if (p.selected.has(p.cursor)) p.selected.delete(p.cursor); else p.selected.add(p.cursor);
+    p.move(1);
+  }
+  else if (k === 'F3') { e.preventDefault(); kb(3); }
+  else if (k === 'F4') { e.preventDefault(); kb(4); }
+  else if (k === 'F5') { e.preventDefault(); kb(5); }
+  else if (k === 'F6') { e.preventDefault(); kb(6); }
+  else if (k === 'F7') { e.preventDefault(); kb(7); }
+  else if (k === 'F8' || k === 'Delete') { e.preventDefault(); kb(8); }
+  else if (k === 'F9') { e.preventDefault(); kb(9); }
+  else if (k === 'F10' || (k === 'r' && (e.metaKey || e.ctrlKey))) { e.preventDefault(); kb(10); }
+  else if (k === 'c' && (e.metaKey || e.ctrlKey)) {
+    const eCur = p.cur();
+    if (eCur && !eCur.up) {
+      clipBoard = { internalDrop: true, cid: eCur.cid, name: eCur.name, paneId: active, isRoot: p.path.length===0, pathJson: JSON.stringify(p.path), action: 'copy' };
+      setXfer('Copied ' + eCur.name); setTimeout(()=>setXfer(''), 2000);
+    }
+  }
+  else if (k === 'x' && (e.metaKey || e.ctrlKey)) {
+    const eCur = p.cur();
+    if (eCur && !eCur.up) {
+      clipBoard = { internalDrop: true, cid: eCur.cid, name: eCur.name, paneId: active, isRoot: p.path.length===0, pathJson: JSON.stringify(p.path), action: 'move' };
+      setXfer('Cut ' + eCur.name); setTimeout(()=>setXfer(''), 2000);
+    }
+  }
+  else if (k === 'v' && (e.metaKey || e.ctrlKey)) {
+    if (clipBoard) {
+      performCopyMove(clipBoard, p, null, clipBoard.action).then(() => { if(clipBoard && clipBoard.action==='move') clipBoard = null; });
+    }
+  }
+});
+
+// ---- search -----------------------------------------------------------------------------------
+
+const cidInput = $('#cidInput');
+cidInput.onkeydown = async (e) => {
+  e.stopPropagation();
+  if (e.key === 'Escape') { cidInput.blur(); document.body.focus(); }
+  if (e.key === 'Enter') {
+    let val = e.target.value.trim();
+    if (val.startsWith('ipfs://')) val = val.slice(7);
+    if (val.startsWith('/ipfs/')) val = val.slice(6);
+    if (!val) return;
+    
+    // Check if it's a valid CID format roughly
+    if (val.length < 40) {
+      alert("Invalid CID format.");
+      return;
+    }
+    
+    const p = pane();
+    p.path = [{name: val, cid: val}];
+    try {
+      await p.load();
+      p.cursor = 0;
+      p.render();
+      cidInput.blur();
+    } catch(err) {
+      alert("Failed to load CID: " + err.message);
+    }
+  }
+};
+
+const searchBox = $('#searchBox');
+const typeFilterBox = $('#typeFilterBox');
+typeFilterBox.onchange = () => {
+  pane().applyFilter();
+  pane().cursor = 0;
+  pane().render();
+};
+searchBox.oninput = () => {
+  pane().setFilter(searchBox.value.trim());
+  searchBox.classList.toggle('active', !!searchBox.value.trim());
+};
+searchBox.onkeydown = (e) => {
+  e.stopPropagation();
+  if (e.key === 'Escape') { searchBox.value = ''; searchBox.oninput(); searchBox.blur(); document.body.focus(); }
+  if (e.key === 'Enter' || e.key === 'ArrowDown') { searchBox.blur(); document.body.focus(); }
+};
+function focusSearch() { searchBox.value = pane().filter; searchBox.focus(); searchBox.select(); }
+
+// ---- boot -------------------------------------------------------------------------------------
+focusPane(panes[0]);
+panes.forEach((p) => p.load());
+loadPeers();
+setInterval(loadPeers, 15000);
+document.body.focus();
+</script>
+</body>
+</html>

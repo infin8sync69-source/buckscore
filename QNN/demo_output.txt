@@ -1,0 +1,83 @@
+============================================================
+QURAN SEMANTIC SEARCH — DEMO OUTPUT
+============================================================
+
+──────────────────────────────────────────────────
+SEARCH: mercy and compassion
+──────────────────────────────────────────────────
+  [Al-Balad 90:17]  score=0.587
+    And then being among those who believed and advised one another to patience and advised one another to compassion.
+  [An-Naml 27:77]  score=0.581
+    And indeed, it is guidance and mercy for the believers.
+  [Aal-i-Imraan 3:132]  score=0.555
+    And obey Allah and the Messenger that you may obtain mercy.
+  [Ar-Room 30:36]  score=0.550
+    And when We let the people taste mercy, they rejoice therein, but if evil afflicts them for what their hands have p…
+  [Yaseen 36:44]  score=0.545
+    Except as a mercy from Us and provision for a time.
+
+──────────────────────────────────────────────────
+SEARCH: Day of Judgment
+──────────────────────────────────────────────────
+  [Al-Mursalaat 77:14]  score=0.653
+    And what can make you know what is the Day of Judgement?
+  [An-Naba 78:17]  score=0.591
+    Indeed, the Day of Judgement is an appointed time -
+  [Ad-Dukhaan 44:40]  score=0.587
+    Indeed, the Day of Judgement is the appointed time for them all -
+  [Al-Mursalaat 77:38]  score=0.567
+    This is the Day of Judgement; We will have assembled you and the former peoples.
+  [Al-Mursalaat 77:13]  score=0.553
+    For the Day of Judgement.
+
+──────────────────────────────────────────────────
+ASK: What does the Quran say about patience?
+──────────────────────────────────────────────────
+Answer:
+⚠  No AI provider configured.
+   Set GEMINI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY.
+
+Sources:
+  [Al-Kahf 18:67] He said, "Indeed, with me you will never be able to have patience.…
+  [Al-Kahf 18:75] [Al-Khidh r] said, "Did I not tell you that with me you would never be able to h…
+  [Al-Kahf 18:72] [Al-Khidh r] said, "Did I not say that with me you would never be able to have p…
+  [Al-Ma'aarij 70:5] So be patient with gracious patience.…
+  [An-Nahl 16:127] And be patient, [O Muhammad], and your patience is not but through Allah. And do…
+
+──────────────────────────────────────────────────
+ASK: How should Muslims treat their parents?
+──────────────────────────────────────────────────
+Answer:
+⚠  No AI provider configured.
+   Set GEMINI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY.
+
+Sources:
+  [Al-Israa 17:23] And your Lord has decreed that you not worship except Him, and to parents, good …
+  [Al-Ahqaf 46:15] And We have enjoined upon man, to his parents, good treatment. His mother carrie…
+  [At-Tawba 9:24] Say, [O Muhammad], "If your fathers, your sons, your brothers, your wives, your …
+  [An-Nahl 16:90] Indeed, Allah orders justice and good conduct and giving to relatives and forbid…
+  [Al-Ankaboot 29:8] And We have enjoined upon man goodness to parents. But if they endeavor to make …
+
+──────────────────────────────────────────────────
+TOP 5 THEMATIC CLUSTERS
+──────────────────────────────────────────────────
+
+Cluster 1  (295 verses):
+  [Maryam 19:39] And warn them, [O Muhammad], of the Day of Regret, when the matter will be concluded; and …
+  [At-Tawba 9:77] So He penalized them with hypocrisy in their hearts until the Day they will meet Him - bec…
+
+Cluster 2  (253 verses):
+  [Hud 11:15] Whoever desires the life of this world and its adornments - We fully repay them for their …
+  [Az-Zumar 39:34] They will have whatever they desire with their Lord. That is the reward of the doers of go…
+
+Cluster 3  (159 verses):
+  [Al-Qiyaama 75:2] And I swear by the reproaching soul [to the certainty of resurrection].…
+  [Al-An'aam 6:12] Say, "To whom belongs whatever is in the heavens and earth?" Say, "To Allah." He has decre…
+
+Cluster 4  (310 verses):
+  [Maryam 19:88] And they say, "The Most Merciful has taken [for Himself] a son."…
+  [Al-Muddaththir 74:21] Then he considered [again];…
+
+Cluster 5  (159 verses):
+  [An-Nahl 16:128] Indeed, Allah is with those who fear Him and those who are doers of good.…
+  [Taa-Haa 20:3] But only as a reminder for those who fear [Allah] -…

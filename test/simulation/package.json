@@ -1,0 +1,17 @@
+{
+  "name": "bucks-synthetic-user-simulation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Synthetic-user simulation harness for the Bucks stack (wallet/chain RPC, Soul Engine agent, E2E messaging + IPFS/P2P).",
+  "type": "commonjs",
+  "scripts": {
+    "sim": "node run-simulation.js"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.6.0",
+    "@noble/hashes": "^1.5.0",
+    "@ethereumjs/tx": "^5.4.0",
+    "@ethereumjs/common": "^4.4.0",
+    "@ethereumjs/util": "^9.1.0"
+  }
+}

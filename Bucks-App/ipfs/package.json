@@ -1,0 +1,24 @@
+{
+  "name": "bucks-files",
+  "productName": "Bucks Files",
+  "version": "1.0.0",
+  "description": "Dual-pane file manager for Bucks Files",
+  "main": "electron-main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac --dir"
+  },
+  "build": {
+    "appId": "local.bucks.files",
+    "files": ["electron-main.js", "server.js", "public/**"],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "identity": null
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

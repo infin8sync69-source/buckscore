@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes — Bucks</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    background: radial-gradient(58% 50% at 18% 8%, rgba(255, 255, 255, 0.18), transparent 62%),
+                radial-gradient(45% 45% at 86% 70%, rgba(255, 255, 255, 0.12), transparent 65%),
+                linear-gradient(165deg, #1f1f23 0%, #151518 55%, #0d0d10 100%);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 20px 24px 16px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.45), rgba(30,30,34,0.35));
+    backdrop-filter: blur(40px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    flex: 1;
+  }
+  .btn-add {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #35353d, #1b1b21);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.88; }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    width: 160px;
+  }
+  .search-box input::placeholder { color: rgba(255,255,255,0.35); }
+  .notes-grid {
+    flex: 1;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    align-content: start;
+    overflow-y: auto;
+  }
+  .note-card {
+    border-radius: 20px;
+    padding: 18px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.42), rgba(30,30,34,0.32));
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .note-card:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,0,0,0.38); }
+  .note-card .note-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    word-break: break-word;
+  }
+  .note-card .note-body {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.55;
+    word-break: break-word;
+    flex: 1;
+    white-space: pre-wrap;
+    max-height: 80px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+  }
+  .note-card .note-date {
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.28);
+  }
+  .note-card .btn-delete {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255,71,87,0.12);
+    color: #ff4757;
+    font-size: 13px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .note-card:hover .btn-delete { display: flex; }
+  .note-card .btn-delete:hover { background: rgba(255,71,87,0.28); }
+  .note-color { height: 4px; border-radius: 2px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 540px;
+    border-radius: 28px;
+    padding: 28px;
+    background: linear-gradient(155deg, rgba(74,74,78,0.72), rgba(32,32,36,0.62));
+    backdrop-filter: blur(50px);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 50px 120px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .modal h2 { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; }
+  .modal input, .modal textarea {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    width: 100%;
+    resize: none;
+  }
+  .modal input::placeholder, .modal textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .modal textarea { min-height: 140px; line-height: 1.6; }
+  .color-row { display: flex; gap: 10px; }
+  .color-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .color-dot.selected { border-color: #fff; transform: scale(1.15); }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-cancel { background: rgba(255,255,255,0.1); color: #fff; }
+  .btn-save { background: linear-gradient(135deg, #35353d, #1b1b21); color: #fff; }
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 0;
+    color: rgba(255,255,255,0.3);
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: 0.3; }
+  .empty-state p { font-size: 15px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Notes</h1>
+  <div class="search-box">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    <input type="text" id="search" placeholder="Search notes…">
+  </div>
+  <button class="btn-add" id="btn-new">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    New Note
+  </button>
+</header>
+<div class="notes-grid" id="grid"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">New Note</h2>
+    <input type="text" id="note-title" placeholder="Title…" maxlength="80">
+    <textarea id="note-body" placeholder="Write something…"></textarea>
+    <div class="color-row" id="color-row"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel">Cancel</button>
+      <button class="btn-save" id="btn-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const COLORS = [
+    { bg: 'linear-gradient(135deg, #35353d, #1b1b21)', bar: '#ffffff' },
+    { bg: 'linear-gradient(135deg,#f7931a,#ffb347)', bar: '#f7931a' },
+    { bg: 'linear-gradient(135deg,#52b6ff,#2d7dff)', bar: '#52b6ff' },
+    { bg: 'linear-gradient(135deg,#ff7a96,#ff2d6e)', bar: '#ff7a96' },
+    { bg: 'linear-gradient(135deg,#54d98a,#22b85a)', bar: '#54d98a' },
+    { bg: 'linear-gradient(135deg,#ff8275,#ff3b30)', bar: '#ff8275' },
+  ];
+  let notes = JSON.parse(localStorage.getItem('bucks-notes') || '[]');
+  let editing = null;
+  let selColor = 0;
+
+  const grid = document.getElementById('grid');
+  const modal = document.getElementById('modal');
+  const noteTitle = document.getElementById('note-title');
+  const noteBody = document.getElementById('note-body');
+  const colorRow = document.getElementById('color-row');
+  const search = document.getElementById('search');
+
+  function save() { localStorage.setItem('bucks-notes', JSON.stringify(notes)); }
+
+  function fmt(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' +
+           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function render() {
+    const q = search.value.toLowerCase();
+    const filtered = notes.filter(n =>
+      n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)
+    );
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p>${notes.length ? 'No matching notes' : 'No notes yet — create your first!'}</p>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map((n, i) => `
+      <div class="note-card" data-id="${n.id}">
+        <div class="note-color" style="background:${COLORS[n.color||0].bar}"></div>
+        <div class="note-title">${n.title || 'Untitled'}</div>
+        <div class="note-body">${n.body}</div>
+        <div class="note-date">${fmt(n.ts)}</div>
+        <button class="btn-delete" data-id="${n.id}" title="Delete">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function buildColorRow() {
+    colorRow.innerHTML = COLORS.map((c, i) =>
+      `<div class="color-dot ${i === selColor ? 'selected' : ''}" data-i="${i}" style="background:${c.bg}" title="Color ${i+1}"></div>`
+    ).join('');
+    colorRow.querySelectorAll('.color-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        selColor = +dot.dataset.i;
+        colorRow.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('selected', +d.dataset.i === selColor));
+      });
+    });
+  }
+
+  function openModal(note = null) {
+    editing = note;
+    selColor = note ? (note.color || 0) : 0;
+    document.getElementById('modal-title').textContent = note ? 'Edit Note' : 'New Note';
+    noteTitle.value = note ? note.title : '';
+    noteBody.value = note ? note.body : '';
+    buildColorRow();
+    modal.classList.add('open');
+    noteTitle.focus();
+  }
+
+  document.getElementById('btn-new').addEventListener('click', () => openModal());
+  document.getElementById('btn-cancel').addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const title = noteTitle.value.trim();
+    const body = noteBody.value.trim();
+    if (!title && !body) return;
+    if (editing) {
+      editing.title = title; editing.body = body; editing.color = selColor; editing.ts = Date.now();
+    } else {
+      notes.unshift({ id: Date.now(), title, body, color: selColor, ts: Date.now() });
+    }
+    save(); render(); modal.classList.remove('open');
+  });
+
+  grid.addEventListener('click', e => {
+    const del = e.target.closest('.btn-delete');
+    if (del) {
+      e.stopPropagation();
+      notes = notes.filter(n => n.id != del.dataset.id);
+      save(); render(); return;
+    }
+    const card = e.target.closest('.note-card');
+    if (card) { openModal(notes.find(n => n.id == card.dataset.id)); }
+  });
+
+  search.addEventListener('input', render);
+  render();
+</script>
+</body>
+</html>

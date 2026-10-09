@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Node startup",
+    "pass": true,
+    "detail": "36ms"
+  },
+  {
+    "name": "String add/get",
+    "pass": true,
+    "detail": "bafkreihedg5iz3ei3crwrlsj75p5q73jjbrnlls2rpraq4s5ujtv2j2xo4"
+  },
+  {
+    "name": "JSON add/get",
+    "pass": true,
+    "detail": "bafkreig6tjz3aaw7arhg5ltpwh66uzldh75realemz75474ahhncpwhb4e"
+  },
+  {
+    "name": "UnixFS add/cat",
+    "pass": true,
+    "detail": "bafkreiakwjhpxx3gxcauk2xr4ci6x2kpd5cymovmabhpl4yfbhi3iv3zwy"
+  },
+  {
+    "name": "Two-node bitswap transfer",
+    "pass": true,
+    "detail": "bafkreibcjlb7ku7nm2oa6zwnfkzw2uqy7n3ndhuvyxrmdqjuop34hgguaa"
+  },
+  {
+    "name": "Bootstrap peer discovery",
+    "pass": false,
+    "detail": "no peers connected (informational — not required for LAN-only design)"
+  },
+  {
+    "name": "GossipSub pubsub",
+    "pass": true,
+    "detail": "delivered"
+  },
+  {
+    "name": "1MB file add + cross-node fetch",
+    "pass": true,
+    "detail": "add=2ms fetch=28ms"
+  },
+  {
+    "name": "Directory + index.html resolution",
+    "pass": true,
+    "detail": "bafybeibvkyw3ytai2hmcsqrhyv6c26gdrbre644qejxr645h42fort5tsa"
+  }
+]

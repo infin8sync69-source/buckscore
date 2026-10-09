@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Secrets — never commit real keys
+.env
+.env.local
+*.wallet
+
+# Runtime data
+chroma_db/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Node (examples)
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db

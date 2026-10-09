@@ -1,0 +1,27 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+crewai==0.80.0
+crewai-tools==0.17.0
+langchain==0.3.7
+langchain-community==0.3.7
+langchain-ollama==0.2.1
+chromadb==0.5.20
+beautifulsoup4==4.12.3
+requests==2.32.3
+httpx==0.27.2
+ddgs>=9.0  # renamed successor of duckduckgo-search
+duckduckgo-search==6.3.7  # legacy fallback; remove once ddgs is proven in the field
+python-dotenv==1.0.1
+pydantic==2.9.2
+openai>=1.0.0
+# ── Agentic extensions ──────────────────────────────────────────
+cryptography>=42.0
+aiohttp>=3.9
+# ── Embedded inference (default backend, no Ollama daemon required) ──
+# macOS wheels ship with Metal support built in. For an NVIDIA GPU box,
+# reinstall with: CMAKE_ARGS="-DGGML_CUDA=on" pip install --force-reinstall llama-cpp-python
+llama-cpp-python>=0.3.4
+huggingface-hub>=0.24
+psutil>=5.9
+# ── Directory watching (tools/watch_impl.py, MCP /resources/watch) ──
+watchdog>=6.0

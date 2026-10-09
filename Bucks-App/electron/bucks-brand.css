@@ -1,0 +1,69 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Bucks Brand mark — minimal typographic signature.
+
+   One rule of thumb: the mark never competes with content. It sits at
+   text-tertiary weight, gains presence only from tracking and the wordmark's
+   optical size, and inherits the neutral palette in both themes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.bucks-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  user-select: none;
+}
+
+.bucks-mark-glyph {
+  display: inline-block;
+  border-radius: 3.5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  transition: transform 0.2s ease;
+}
+.bucks-mark:hover .bucks-mark-glyph {
+  transform: scale(1.06);
+}
+
+.bucks-wordmark {
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-weight: 700;
+  /* Tight, slightly negative tracking is the whole identity here — it is what
+     separates a wordmark from a run of body text at the same size. */
+  letter-spacing: -0.045em;
+  color: var(--text-primary);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bucks-rule {
+  width: 1px;
+  align-self: stretch;
+  min-height: 0.9em;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.bucks-context {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sizes ── */
+.bucks-mark-sm .bucks-wordmark { font-size: 13px; }
+.bucks-mark-sm .bucks-context  { font-size: 10.5px; }
+.bucks-mark-sm { gap: 7px; }
+
+.bucks-mark-md .bucks-wordmark { font-size: 17px; }
+.bucks-mark-md .bucks-context  { font-size: 12px; }
+
+.bucks-mark-lg .bucks-wordmark { font-size: 26px; letter-spacing: -0.05em; }
+.bucks-mark-lg .bucks-context  { font-size: 13px; }
+.bucks-mark-lg { gap: 11px; }
