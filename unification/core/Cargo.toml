@@ -1,0 +1,3 @@
+[workspace]
+members = ["bucks-core"]
+resolver = "2"
