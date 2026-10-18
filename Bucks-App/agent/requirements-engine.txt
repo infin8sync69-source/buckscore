@@ -1,0 +1,14 @@
+# Soul Engine (soul_engine.py) as started by the Bucks Browser.
+# Only what the engine imports; the heavier extras below are optional.
+# The full set for the CrewAI/LangChain swarm servers (server.py,
+# server_lite.py) stays in requirements.txt.
+fastapi>=0.115
+uvicorn[standard]>=0.32
+httpx>=0.27
+beautifulsoup4>=4.12
+aiohttp>=3.9
+cryptography>=42.0
+python-dotenv>=1.0
+psutil>=5.9
+ddgs>=9.0
+watchdog>=6.0

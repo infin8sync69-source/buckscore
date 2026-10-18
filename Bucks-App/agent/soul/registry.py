@@ -11,10 +11,11 @@ from pathlib import Path
 from typing import Optional
 
 from .validator import is_trusted
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.soul.registry")
 
-_REGISTRY_FILE = Path(__file__).parent.parent.parent / "data" / "known_souls.json"
+_REGISTRY_FILE = data_dir() / "known_souls.json"
 
 
 def _ensure_data_dir() -> None:

@@ -11,10 +11,11 @@ import sqlite3
 import time
 from pathlib import Path
 from typing import List, Optional
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.rl.experience")
 
-_DB_PATH = Path(__file__).parent.parent.parent / "data" / "experience.db"
+_DB_PATH = data_dir() / "experience.db"
 
 
 def _ensure_dir() -> None:

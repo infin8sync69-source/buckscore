@@ -3,6 +3,7 @@ Shell execution tools for the Code Agent.
 Whitelisted commands only — no destructive operations.
 """
 import os
+import shlex
 import subprocess
 from pathlib import Path
 from crewai.tools import tool
@@ -20,8 +21,16 @@ ALLOWED_PREFIXES = (
 )
 
 
+# A prefix check alone is not an allowlist when the command goes to a shell:
+# "ls ; rm -rf ~" starts with "ls ". Commands therefore run without a shell
+# (argv from shlex), and anything a shell would interpret is refused outright.
+SHELL_METACHARACTERS = (";", "&", "|", "`", "$(", ">", "<", "\n", "\r")
+
+
 def _is_allowed(cmd: str) -> bool:
     stripped = cmd.strip()
+    if any(m in stripped for m in SHELL_METACHARACTERS):
+        return False
     return any(stripped.startswith(p) for p in ALLOWED_PREFIXES)
 
 
@@ -34,11 +43,12 @@ def run_shell(command: str, cwd: str = "") -> str:
     """
     if not _is_allowed(command):
         return f"Command not allowed for safety: '{command}'. Permitted prefixes: {ALLOWED_PREFIXES}"
-    work_dir = BUCKS_ROOT / cwd if cwd else BUCKS_ROOT
+    work_dir = (BUCKS_ROOT / cwd).resolve() if cwd else BUCKS_ROOT
+    if not work_dir.is_relative_to(BUCKS_ROOT.resolve()):
+        return f"Working directory must stay inside the project: '{cwd}'"
     try:
         result = subprocess.run(
-            command,
-            shell=True,
+            shlex.split(command),
             cwd=str(work_dir),
             capture_output=True,
             text=True,

@@ -12,10 +12,11 @@ import logging
 import random
 from pathlib import Path
 from typing import List, Optional
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.rl.policy")
 
-_POLICY_FILE = Path(__file__).parent.parent.parent / "data" / "routing_policy.json"
+_POLICY_FILE = data_dir() / "routing_policy.json"
 _DEFAULT_AGENTS = ["slm", "browser", "wallet", "ipfs", "code", "commerce", "calendar"]
 _ALPHA   = 0.1   # EMA learning rate
 _EPSILON = 0.1   # exploration rate

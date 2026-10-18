@@ -23,10 +23,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Provider ──────────────────────────────────────────────────────────────────
-# "nim" = NVIDIA NIM cloud provider, default live agent backend for this app.
-# "edge" = embedded llama-cpp-python, in-process, no external daemon.
+# "edge" = embedded llama-cpp-python, in-process, no external daemon (default:
+#          local first, nothing leaves the machine unless the user opts in).
 # "ollama" = talk to a locally running Ollama server instead (opt-in).
-MODEL_PROVIDER  = os.getenv("MODEL_PROVIDER", "nim").lower()
+# "nim" / "litai" = cloud providers, opt-in with the user's own API key.
+MODEL_PROVIDER  = os.getenv("MODEL_PROVIDER", "edge").lower()
 LITAI_API_KEY   = os.getenv("LITAI_API_KEY", "")
 LITAI_BASE_URL  = os.getenv("LITAI_BASE_URL", "https://lightning.ai/api/v1")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

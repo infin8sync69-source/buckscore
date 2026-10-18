@@ -67,6 +67,9 @@ N_CTX = int(os.getenv("BUCKS_EDGE_N_CTX", "8192"))
 _llm: Optional[Any] = None
 _current_model_id: Optional[str] = None
 _load_lock = asyncio.Lock()
+# Why the last load failed (missing llama-cpp-python, download error, …), so
+# /health can say so instead of reporting "loading" forever.
+_load_error: Optional[str] = None
 _infer_lock = asyncio.Lock()
 
 # Download progress (UI feedback for the multi-minute first-run/model-switch
@@ -296,8 +299,27 @@ def _load(model_id: Optional[str] = None) -> Any:
 
 
 async def ensure_loaded(model_id: Optional[str] = None) -> Any:
+    global _load_error
     async with _load_lock:
-        return await asyncio.to_thread(_load, model_id)
+        try:
+            llm = await asyncio.to_thread(_load, model_id)
+        except Exception as e:
+            _load_error = f"{type(e).__name__}: {e}"
+            raise
+        _load_error = None
+        return llm
+
+
+async def warm_up() -> None:
+    """Load the model in the background; a failure is kept for load_error()."""
+    try:
+        await ensure_loaded()
+    except Exception as e:  # noqa: BLE001 - reported through /health
+        log.warning("Embedded model could not be loaded: %s", e)
+
+
+def load_error() -> Optional[str]:
+    return _load_error
 
 
 async def is_ready() -> bool:

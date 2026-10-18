@@ -274,6 +274,10 @@ function _pollUntilReady(maxWaitMs = 180_000) {
     } else if (h && h.mode === 'unconfigured') {
       _emit({ state: 'error', detail: `${h.provider || 'cloud'} provider needs a valid API key in agent/.env or Bucks Settings` });
       return;
+    } else if (h && h.mode === 'error') {
+      // The embedded model failed to load (e.g. llama-cpp-python missing); /health says why.
+      _emit({ state: 'error', detail: `embedded model could not be loaded: ${h.error || 'unknown error'}` });
+      return;
     }
     if (Date.now() - started > maxWaitMs) {
       _emit({ state: 'error', detail: 'engine did not become ready in time' });

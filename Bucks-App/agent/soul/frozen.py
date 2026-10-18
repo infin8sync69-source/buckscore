@@ -12,8 +12,10 @@ in the soul manifest so peer agents can verify both layers before trust.
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Optional
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.soul.frozen")
 
@@ -86,7 +88,7 @@ def _build_runtime_system_prompt(data: dict) -> str:
 
 _RUNTIME_SYSTEM_PROMPT: str = _build_runtime_system_prompt(_FROZEN_DATA)
 
-_CID_CACHE_FILE = Path(__file__).parent / ".frozen_cid_cache"
+_CID_CACHE_FILE = (data_dir() if os.getenv("BUCKS_DATA_DIR") else Path(__file__).parent) / ".frozen_cid_cache"
 
 
 class FrozenMemory:
@@ -172,7 +174,7 @@ class FrozenMemory:
         if cls._world_soul_hash:
             return cls._world_soul_hash
         # Try loading from meta file written by WorldSoul.lock()
-        meta_file = Path(__file__).parent.parent.parent / "data" / "world_soul_meta.json"
+        meta_file = data_dir() / "world_soul_meta.json"
         if meta_file.exists():
             try:
                 cls._world_soul_hash = json.loads(

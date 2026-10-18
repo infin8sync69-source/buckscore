@@ -44,10 +44,10 @@ from typing import Any, AsyncGenerator, Optional
 
 import httpx
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
 import config
+import local_auth
 import edge_llm
 import model_engine
 import genui
@@ -962,15 +962,13 @@ async def lifespan(app: FastAPI):
         # Warm up in the background so startup doesn't block on a multi-second
         # (or first-run, multi-minute download) model load. /health reports
         # "loading" until this finishes.
-        asyncio.create_task(edge_llm.ensure_loaded())
+        asyncio.create_task(edge_llm.warm_up())
     yield
 
 
 app = FastAPI(title="Bucks Soul Engine — NEXUS", lifespan=lifespan)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-)
+# Bearer-token gate (BUCKS_SOUL_TOKEN) and CORS policy, see local_auth.py.
+local_auth.install(app, "BUCKS_SOUL")
 
 
 def sse(obj: dict[str, Any]) -> str:
@@ -985,12 +983,16 @@ async def health() -> JSONResponse:
     if _use_embedded():
         ready = edge_llm.current_model_id() is not None
         model_id = edge_llm.current_model_id() or edge_llm.resolve_model_id()
-        return JSONResponse({
+        error = None if ready else edge_llm.load_error()
+        body = {
             "model": model_id,
             "device": edge_llm.device_label(),
-            "mode": "local_llm" if ready else "loading",
+            "mode": "local_llm" if ready else ("error" if error else "loading"),
             "online": True,
-        })
+        }
+        if error:
+            body["error"] = error
+        return JSONResponse(body)
 
     # A cloud provider does not need a local model warm-up. Reporting NIM as
     # "offline" here prevented the Electron supervisor from ever marking the
@@ -1476,6 +1478,11 @@ async def select_provider_endpoint(req: Request) -> JSONResponse:
     """Switch the active inference provider (persisted; survives restart)."""
     body = await req.json()
     result = model_engine.switch_provider(body.get("provider", ""))
+    # Startup only warms the embedded model when edge was already selected;
+    # switching to it later has to start the load too, or /health would report
+    # "loading" until the first chat request happened to trigger it.
+    if result.get("ok") and _use_embedded() and edge_llm.current_model_id() is None:
+        asyncio.create_task(edge_llm.warm_up())
     return JSONResponse(result)
 
 

@@ -25,8 +25,8 @@ from contextlib import asynccontextmanager, aclosing
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
 
+import local_auth
 from tools.registry import TOOLS, get_tool
 
 logging.basicConfig(level=logging.INFO)
@@ -41,14 +41,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS for Claude Code and other clients
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Bearer-token gate (BUCKS_MCP_TOKEN) and CORS policy, see local_auth.py.
+# MCP clients send the token as "Authorization: Bearer <token>".
+local_auth.install(app, "BUCKS_MCP")
 
 
 # ─── MCP Protocol Responses ──────────────────────────────────────────────────

@@ -1,0 +1,7 @@
+# Embedded on-device model (MODEL_PROVIDER=edge). Installed on top of
+# requirements-engine.txt. llama-cpp-python ships prebuilt wheels for macOS
+# (with Metal); on Linux and Windows pip may compile it, which needs a C/C++
+# compiler and CMake. For an NVIDIA GPU:
+#   CMAKE_ARGS="-DGGML_CUDA=on" pip install --force-reinstall llama-cpp-python
+llama-cpp-python>=0.3.4
+huggingface-hub>=0.24

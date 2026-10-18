@@ -15,7 +15,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PROVIDER="${MODEL_PROVIDER:-nim}"
+PROVIDER="${MODEL_PROVIDER:-edge}"
 PORT="${BUCKS_PORT:-8765}"
 
 # 1. Ensure a venv with deps exists
@@ -30,9 +30,7 @@ if [ ! -x ".venv/bin/python" ]; then
   echo "→ Using Python executable: $PYTHON_EXE"
   $PYTHON_EXE -m venv .venv
   .venv/bin/pip install --quiet --upgrade pip
-  .venv/bin/pip install --quiet fastapi "uvicorn[standard]" httpx beautifulsoup4 ddgs \
-    llama-cpp-python huggingface-hub psutil \
-    aiohttp cryptography chromadb
+  .venv/bin/pip install --quiet -r requirements-engine.txt -r requirements-edge.txt
 fi
 
 # 2. If explicitly pointed at Ollama, make sure it's actually reachable.

@@ -31,10 +31,11 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.soul.world_soul")
 
-_DATA_DIR      = Path(__file__).parent.parent.parent / "data"
+_DATA_DIR      = data_dir()
 _LOCKED_FILE   = _DATA_DIR / "world_soul.locked"
 _META_FILE     = _DATA_DIR / "world_soul_meta.json"
 _SOUL_KEY_FILE = Path(os.path.expanduser("~/.bucks/agent_soul_key.pem"))

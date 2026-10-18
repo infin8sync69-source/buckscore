@@ -23,11 +23,11 @@ MEMORY_DIR = Path.home() / ".bucks" / "agent-memory"
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = MEMORY_DIR / "bucks.db"
 
-# Cloud database setup
-POSTGRES_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:yP._p2EH6*_d-B-@db.gyhzcmiuuzvjmwyhmamk.supabase.co:5432/postgres"
-)
+# Cloud database setup. Opt-in only: without DATABASE_URL everything stays in the
+# local SQLite file above, and nothing a user types leaves the machine. (An earlier
+# version fell back to a hardcoded Postgres URL with its password; that credential
+# is compromised and must not come back.)
+POSTGRES_URL = os.getenv("DATABASE_URL", "").strip()
 
 # Connection state
 _pg_conn_instance = None
@@ -35,7 +35,7 @@ _postgres_active = False
 
 def _get_pg_conn():
     global _pg_conn_instance, _postgres_active
-    if not PSYCOPG2_AVAILABLE:
+    if not PSYCOPG2_AVAILABLE or not POSTGRES_URL:
         _postgres_active = False
         return None
 

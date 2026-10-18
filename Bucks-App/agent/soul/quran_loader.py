@@ -23,10 +23,11 @@ from pathlib import Path
 from typing import Optional
 
 import aiohttp
+from runtime_paths import data_dir
 
 log = logging.getLogger("bucks.soul.quran_loader")
 
-_DATA_DIR  = Path(__file__).parent.parent.parent / "data"
+_DATA_DIR  = data_dir()
 _CACHE     = _DATA_DIR / "quran_source.json"
 _HASH_FILE = _DATA_DIR / "quran_source.sha256"
 
