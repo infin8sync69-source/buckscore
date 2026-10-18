@@ -1,5 +1,11 @@
 # Bucks Production Application Launch Folder
 
+> **Note (2026-10-18):** this is the shipped v1.1.0. The browser's source now lives in
+> [infin8sync69-source/Bucks-browser](https://github.com/infin8sync69-source/Bucks-browser), which
+> is taking over this app's features module by module, starting with the Soul Engine (`agent/`).
+> See `PROJECT_MAP.md` §10 and `docs/ALIGNMENT.md` in that repository. Fixes to `agent/` belong in
+> both places.
+
 This is the clean, production-ready release folder for **Bucks Agentic AI Web3 Browser**. All unnecessary documentation drafts, temporary logs, and experimental scratch files have been excluded.
 
 ---

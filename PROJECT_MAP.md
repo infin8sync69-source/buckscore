@@ -1,6 +1,6 @@
 # Bucks Project Map
 
-*Last updated: 2026-08-15. This is the single navigable index for the whole Bucks ecosystem across every folder on the Desktop. Read this before any other doc — it tells you what's canonical, what's experimental, and what's stale.*
+*Last updated: 2026-10-18 (§10, browser alignment). This is the single navigable index for the whole Bucks ecosystem across every folder on the Desktop. Read this before any other doc — it tells you what's canonical, what's experimental, and what's stale.*
 
 ---
 
@@ -136,7 +136,7 @@ Per `DISTRIBUTION.md`, the live site deploys via Vercel auto-deploy on push to `
 | Folder | Purpose | Status |
 |---|---|---|
 | `Bucks Core/` | Main development workspace — browser, wallet, miner, contracts, Go node, Soul Engine, site source, planning docs | Active, canonical |
-| `Bucks-App/` | Packaged/built production release of the browser (built *from* Bucks Core) | Active, canonical release artifact |
+| `Bucks-App/` | Packaged/built production release of the browser (built *from* Bucks Core) | Shipped v1.1.0; reference for features not yet ported to the Bucks-browser repo (§10) |
 | `Bucks Blockchain/` | Standalone C++/UTXO chain implementation, more feature-complete than `node/` but not wired into the live wallet | Active development, experimental/not-yet-integrated |
 | `BUCKS_REFERENCE/` | Manually maintained documentation snapshot/mirror covering architecture, blockchain, browser, files, global site, mobile, QNN, vision | Reference-only, partially stale — see §5 |
 | `Bucks-Windows-Setup/` | Prebuilt Windows installer (.exe) + PowerShell scripts for the same browser/agent stack, Windows-specific packaging | Active, platform-specific companion to Bucks-App |
@@ -154,6 +154,8 @@ Per `DISTRIBUTION.md`, the live site deploys via Vercel auto-deploy on push to `
 | Canonical blockchain engine (today) | `Bucks Core/node/` (Go/EVM) | This file, §3 — wallet/miner/contracts all depend on it |
 | Next-gen blockchain engine (in progress, not yet default) | `Bucks Blockchain/` (C++/UTXO) | This file, §3 |
 | Live install command state | Needs verification against GitHub `main` — local clone has unpushed/uncommitted changes | This file, §4; `Bucks Core/bucks.global/` git status |
+| Browser source (shell, IPFS, agent) | The `infin8sync69-source/Bucks-browser` repository (Electron, `electron-main` line) | This file, §10; `docs/ALIGNMENT.md` there |
+| Soul Engine agent code | `agent/` in Bucks-browser; `Bucks-App/agent/` here kept in step | This file, §10 |
 
 ---
 
@@ -163,6 +165,8 @@ Per `DISTRIBUTION.md`, the live site deploys via Vercel auto-deploy on push to `
 2. **`bucks.global` install fixes may not be live.** The local git clone has 1 unpushed commit and uncommitted changes to `index.html`/`install`/`install.ps1`/`version.json`. Needs verification against the deployed site and GitHub before relying on it for a marketing push.
 3. **No literal duplication conflicts found between `BUCKS_REFERENCE/` and `Bucks Core/`'s own docs on facts checked (tokenomics, chain ID)**, but the two Blockchain doc sets have drifted apart structurally (different content, missing files) — worth a deliberate reconciliation or clearly marking `BUCKS_REFERENCE/` as archival if it's not going to be kept in sync.
 4. **`bucks-contracts-plan.md`'s smart-contract layer (marketplace, profiles, Soul Engine oracle attestation) is written entirely against the EVM/Solidity model** — meaning if the C++/UTXO chain is ever promoted to canonical, this entire contracts design either needs a rethink or the two chains need to coexist by design (EVM for contracts, UTXO for base transfers) rather than one replacing the other. This wasn't flagged anywhere in the docs reviewed and is worth a deliberate decision rather than letting it fall out of the migration by default.
+5. **A Supabase database password was committed** in `Bucks-App/agent/memory/session_store.py` (removed from the tree 2026-10-18, §10). It is still in git history: rotate it. Purging history is a separate decision (rewrite + force push).
+6. **Bucks-browser alignment branch not merged yet.** `claude/browser-repos-alignment-aew07f` in Bucks-browser (on top of `electron-main`) carries the Soul Engine; merge it into `electron-main` after review.
 
 ---
 
@@ -179,3 +183,38 @@ A full senior-engineer architecture audit of the five backend/client subsystems 
 - `contracts/` implements a small, non-upgradeable, single-EOA-admin fraction of `bucks-contracts-plan.md`; `BucksEscrow.sol` (the one contract holding user funds via deposit/dispute/claim) has zero test coverage; nothing has ever been deployed (`contracts/deployments/` is empty).
 
 **What was refactored (mechanical, behavior-preserving only — verified via build/test/benchmark, no functionality changed):** centralized the `ChainID` constant in `node/`; extracted a shared `Fees.split()` library in `contracts/` (50/50 tests still pass); deduped `bytesToHex`/`hexToBytes`/`uuid` helpers and centralized the chain-ID display literal in `wallet/`; fixed a per-hash-attempt buffer allocation in `miner/`'s hot mining loop (new test+benchmark added, `miner/` previously had zero tests); centralized default addresses in `miner/`'s config. Full before/after detail, the complete problem list with file:line citations, and a prioritized roadmap are in the docx above.
+
+---
+
+## 10. Browser alignment (2026-10-18): Bucks-browser is the browser
+
+Two code bases were each "the Bucks browser": `Bucks-App/` here (the packaged Electron "Bucks
+Core" v1.1.0, rich in features, monolithic, macOS arm64 only) and the `infin8sync69-source/Bucks-browser`
+repository, whose `electron-main` branch (2026-10-17/18) is a modular Electron rewrite with a
+supervised Kubo node, a security layer, device pairing, Linux/Windows/macOS packaging and tests.
+The unification plan (branch `claude/unification-plan-and-core`, ADR 0002) had proposed Tauri; the
+Electron rewrite came after it and replaced the Tauri app, so the alignment follows Electron.
+
+**Decision:** Bucks-browser is the browser's source. Features move there from `Bucks-App/` module by
+module; `Bucks-App/` stays as the shipped release and the reference.
+
+Done in the first step (Bucks-browser branch `claude/browser-repos-alignment-aew07f`):
+
+- The Soul Engine (`Bucks-App/agent/`) moved to `agent/` there, run by a new supervisor as a
+  loopback sidecar with a per-launch bearer token, an on-device model by default and a one-click
+  private Python install; answers show generative-UI cards and follow-up questions in the chat
+  panel. Tested end to end against the real engine, including in the running app.
+- Fixes made on the way and applied to **both** copies of the agent (`Bucks-App/agent/` here too):
+  the hard-coded Supabase connection string with password removed (cloud sync opt-in via
+  `DATABASE_URL`); `local_auth.py` token gate for the Soul Engine and MCP server (off when no token
+  is set, so Bucks-App behaves as before); `run_shell` no longer runs strings in a shell
+  (`ls ; anything` was accepted); on-device model as the default backend; runtime data follows
+  `BUCKS_DATA_DIR`; `/health` reports a failed model load. Bucks-App's supervisor also reports that
+  failure now instead of timing out.
+- The reference chat engine in Bucks-browser (`src/main/chat/`) was updated to Bucks-App's
+  hardened version.
+
+Still only in `Bucks-App/` (planned in this order): agent control of the live tab with approvals,
+E2E chat over Kubo pubsub, the MCP server switch, built-in mini apps, universe/maps, dWeb studio,
+cluster membership, split panes. Not carried over: the chain/miner binaries and their managers,
+the QNN stdin bridge, the simulation harness. Full map: `docs/ALIGNMENT.md` in Bucks-browser.
