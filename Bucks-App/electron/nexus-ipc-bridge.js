@@ -24,6 +24,7 @@
 const http  = require('http');
 const https = require('https');
 const { ipcMain } = require('electron');
+const agentAuth = require('./agent-auth');
 
 const SOUL_ENGINE_URL = process.env.BUCKS_SOUL_URL || 'http://127.0.0.1:8765';
 const REQUEST_TIMEOUT = 120_000; // 2 min for long agent tasks
@@ -83,6 +84,7 @@ async function _handleStartGoal(_event, { prompt, context = '', agentic = true, 
       headers: {
         'Content-Type':   'application/json',
         'Content-Length': Buffer.byteLength(body),
+        ...agentAuth.authHeaders(),
       },
     };
 
@@ -219,7 +221,7 @@ function _getJSON(path) {
   return new Promise((resolve, reject) => {
     const url   = new URL(path, SOUL_ENGINE_URL);
     const proto = url.protocol === 'https:' ? https : http;
-    const req   = proto.get(url, (res) => {
+    const req   = proto.get(url, { headers: agentAuth.authHeaders() }, (res) => {
       let body = '';
       res.on('data', (d) => (body += d));
       res.on('end', () => {
@@ -238,7 +240,7 @@ function _postJSON(path, payload) {
     const proto  = url.protocol === 'https:' ? https : http;
     const req    = proto.request(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body), ...agentAuth.authHeaders() },
     }, (res) => {
       let data = '';
       res.on('data', (d) => (data += d));

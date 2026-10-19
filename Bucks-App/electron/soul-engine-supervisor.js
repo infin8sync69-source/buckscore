@@ -23,6 +23,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const agentAuth = require('./agent-auth');
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.BUCKS_SOUL_PORT || 8765);
@@ -58,6 +59,22 @@ function _getJSON(url, timeoutMs = 2500) {
 
 async function _health() {
   return _getJSON(`http://${HOST}:${PORT}/health`);
+}
+
+/**
+ * Status code of an authenticated request, or null if the engine is
+ * unreachable. /health is public, so it cannot tell us whether an engine we
+ * are about to adopt shares our token; this can.
+ */
+function _authStatus(timeoutMs = 2500) {
+  return new Promise((resolve) => {
+    const req = http.get(
+      { host: HOST, port: PORT, path: '/agent/goals', headers: agentAuth.authHeaders() },
+      (res) => { res.resume(); resolve(res.statusCode); },
+    );
+    req.on('error', () => resolve(null));
+    req.setTimeout(timeoutMs, () => { req.destroy(); resolve(null); });
+  });
 }
 
 /**
@@ -155,6 +172,13 @@ async function start(onStatus) {
   const existing = await _health();
   if (existing) {
     if (_isSoulEngine(existing)) {
+      if (await _authStatus() === 401) {
+        _emit({
+          state: 'conflict',
+          detail: `Soul Engine on :${PORT} uses a different access token — restart it so it reads ${agentAuth.TOKEN_FILE}`,
+        });
+        return;
+      }
       _emit({ state: 'ready', adopted: true, model: existing.model, mode: existing.mode });
       _pollUntilReady();
       return;
@@ -214,6 +238,7 @@ async function start(onStatus) {
     ...process.env,
     MODEL_PROVIDER: provider,
     BUCKS_PROJECT_ROOT: path.join(agent.dir, '..'),
+    BUCKS_AGENT_TOKEN: agentAuth.getToken(),
   };
   if (useOllama) {
     env.BUCKS_MODEL = process.env.BUCKS_MODEL || OLLAMA_MODEL;

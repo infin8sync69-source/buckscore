@@ -21,6 +21,7 @@ const { advertiseAgentSoul, pinSoul, onPeerSoul } = require("./ipfs-node");
 // exposes GET/POST /api/v1/soul* (see soul_engine.py's "Soul identity + P2P
 // discovery" section). The old :3000 Tauri-era server this pointed at is dead.
 const AGENT_SERVER_URL = process.env.AGENT_SERVER_URL || "http://localhost:8765";
+const agentAuth = require("./agent-auth");
 const SOUL_ADVERTISE_INTERVAL_MS = 30_000; // 30 seconds
 
 let _ownSoul = null;
@@ -31,7 +32,7 @@ let _pinAttemptedForSoul = null;
 
 function agentGet(path) {
   return new Promise((resolve, reject) => {
-    const req = http.get(`${AGENT_SERVER_URL}${path}`, (res) => {
+    const req = http.get(`${AGENT_SERVER_URL}${path}`, { headers: agentAuth.authHeaders() }, (res) => {
       let body = "";
       res.on("data", (d) => (body += d));
       res.on("end", () => {
@@ -40,7 +41,7 @@ function agentGet(path) {
       });
     });
     req.on("error", reject);
-    req.setTimeout(5000, () => { req.abort(); reject(new Error("timeout")); });
+    req.setTimeout(5000, () => { req.destroy(); reject(new Error("timeout")); });
   });
 }
 
@@ -49,7 +50,7 @@ function agentPost(path, payload) {
     const body = JSON.stringify(payload);
     const opts = {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
+      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), ...agentAuth.authHeaders() },
     };
     const url = new URL(path, AGENT_SERVER_URL);
     const req = http.request(url, opts, (res) => {
@@ -61,7 +62,7 @@ function agentPost(path, payload) {
       });
     });
     req.on("error", reject);
-    req.setTimeout(8000, () => { req.abort(); reject(new Error("timeout")); });
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error("timeout")); });
     req.write(body);
     req.end();
   });

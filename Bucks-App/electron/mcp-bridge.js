@@ -18,6 +18,7 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const os = require('os');
+const agentAuth = require('./agent-auth');
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.BUCKS_MCP_PORT || 9999);
@@ -152,6 +153,7 @@ async function start(onStatus) {
   const env = {
     ...process.env,
     BUCKS_MCP_PORT: String(PORT),
+    BUCKS_AGENT_TOKEN: agentAuth.getToken(),
     PYTHONUNBUFFERED: '1',
   };
 

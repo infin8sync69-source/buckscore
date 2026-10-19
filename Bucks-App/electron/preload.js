@@ -199,6 +199,9 @@ const bucksAPI = {
   ephemeralContext: (text, type) =>
     ipcRenderer.invoke('ephemeral-context', { text, type: type || 'selection' }),
 
+  /** {baseUrl, token} for calling the Soul Engine; used by agent-client.js. */
+  getAgentAuth: () => ipcRenderer.invoke('agent:auth'),
+
   /**
    * Subscribe to AG-UI push events from agent-interface.js.
    * Events: task.start, task.thinking, task.tool_call, task.result,

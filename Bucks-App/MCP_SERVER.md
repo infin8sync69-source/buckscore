@@ -63,7 +63,15 @@ In Claude Code, use the MCP server to access Bucks tools:
 ```bash
 # The server runs at http://127.0.0.1:9999
 curl http://127.0.0.1:9999/health
+
+# Every other endpoint needs the local agent token (created on first start):
+TOKEN=$(cat ~/.bucks/agent.token)
+curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:9999/tools
 ```
+
+Configure your MCP client to send `Authorization: Bearer <contents of ~/.bucks/agent.token>`
+with each request. WebSocket clients that cannot set headers may append `&token=<token>`
+to the `/resources/watch` URL instead.
 
 ### Using from Claude Code
 
@@ -283,8 +291,16 @@ expose credentials sitting under it. See `DENIED_NAMES` in
 
 ### Network
 - MCP server only listens on localhost (127.0.0.1)
-- Soul Engine proxy validates responses
-- CORS enabled for Claude Code integration
+- Listening on loopback is not a security boundary on its own: any web page in any
+  browser on this machine can send requests to 127.0.0.1. Every endpoint except
+  `/health` therefore requires `Authorization: Bearer <token>`, where the token is the
+  contents of `~/.bucks/agent.token` (mode 0600, override the path with
+  `BUCKS_AGENT_TOKEN_FILE`). The Soul Engine uses the same token.
+- Requests whose `Host` header is not `127.0.0.1`, `localhost` or `[::1]` are refused
+  (DNS-rebinding defence).
+- CORS is granted only to the Bucks shell (`Origin: null`, its file:// pages); browser
+  pages elsewhere cannot read responses even if they guess an endpoint.
+- Implementation: `agent/local_auth.py` (servers) and `electron/agent-auth.js` (app).
 
 ## Troubleshooting
 
@@ -315,13 +331,16 @@ expose credentials sitting under it. See `DENIED_NAMES` in
 
 2. List available tools:
    ```bash
-   curl http://127.0.0.1:9999/tools
+   curl -H "Authorization: Bearer $(cat ~/.bucks/agent.token)" http://127.0.0.1:9999/tools
    ```
 
 3. Check tool status:
    ```bash
-   curl http://127.0.0.1:9999/capabilities
+   curl -H "Authorization: Bearer $(cat ~/.bucks/agent.token)" http://127.0.0.1:9999/capabilities
    ```
+
+4. A `401` means the token is missing or does not match the server's. A server started
+   before `~/.bucks/agent.token` changed keeps its old token — restart it.
 
 ### File Operations Failing
 

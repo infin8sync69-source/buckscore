@@ -44,13 +44,13 @@ from typing import Any, AsyncGenerator, Optional
 
 import httpx
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
 import config
 import edge_llm
 import model_engine
 import genui
+import local_auth
 from tools.registry import TOOLS
 
 from soul.generator import load_or_create_soul, sign_payload
@@ -967,10 +967,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Bucks Soul Engine — NEXUS", lifespan=lifespan)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-)
+# Token-gated, shell-only CORS: see local_auth.py for why loopback is not enough.
+local_auth.protect(app, expose_headers=["X-Session-Id"])
 
 
 def sse(obj: dict[str, Any]) -> str:

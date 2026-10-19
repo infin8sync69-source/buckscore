@@ -21,6 +21,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from soul_engine import app
 
 
+def _client() -> AsyncClient:
+    """An in-process client that talks to the engine the way the shell does:
+    over loopback, with the shared agent token (set in conftest.py)."""
+    return AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url='http://127.0.0.1',
+        headers={'Authorization': f"Bearer {os.environ['BUCKS_AGENT_TOKEN']}"},
+    )
+
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 async def _collect_sse(response) -> list[dict]:
@@ -43,7 +53,7 @@ async def _collect_sse(response) -> list[dict]:
 
 @pytest.mark.asyncio
 async def test_health():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.get('/health')
     assert r.status_code == 200
     data = r.json()
@@ -56,7 +66,7 @@ async def test_health():
 
 @pytest.mark.asyncio
 async def test_router_classify_agent():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.get('/router/classify', params={'q': 'search the web for Python tutorials'})
     assert r.status_code == 200
     data = r.json()
@@ -66,7 +76,7 @@ async def test_router_classify_agent():
 
 @pytest.mark.asyncio
 async def test_router_classify_wallet():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.get('/router/classify', params={'q': 'show my wallet balance'})
     assert r.status_code == 200
     data = r.json()
@@ -75,7 +85,7 @@ async def test_router_classify_wallet():
 
 @pytest.mark.asyncio
 async def test_router_classify_chat():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.get('/router/classify', params={'q': 'hello how are you'})
     assert r.status_code == 200
     data = r.json()
@@ -87,7 +97,7 @@ async def test_router_classify_chat():
 
 @pytest.mark.asyncio
 async def test_create_and_list_goals():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         # Create a goal
         session_id = f'test-{int(time.time())}'
         r = await client.post('/agent/goals', json={
@@ -112,7 +122,7 @@ async def test_create_and_list_goals():
 
 @pytest.mark.asyncio
 async def test_create_goal_auto_session_id():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.post('/agent/goals', json={'goal': 'Auto ID goal'})
     assert r.status_code == 200
     data = r.json()
@@ -124,7 +134,7 @@ async def test_create_goal_auto_session_id():
 
 @pytest.mark.asyncio
 async def test_cancel_nonexistent_session():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.post('/agent/cancel/nonexistent-session-id')
     assert r.status_code == 200
     data = r.json()
@@ -136,7 +146,7 @@ async def test_cancel_nonexistent_session():
 
 @pytest.mark.asyncio
 async def test_approve_unknown_action():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.post('/agent/approve/test-session', json={'action_id': 'unknown-abc'})
     assert r.status_code == 200
     data = r.json()
@@ -145,7 +155,7 @@ async def test_approve_unknown_action():
 
 @pytest.mark.asyncio
 async def test_deny_unknown_action():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.post('/agent/deny/test-session', json={'action_id': 'unknown-xyz'})
     assert r.status_code == 200
     data = r.json()
@@ -156,7 +166,7 @@ async def test_deny_unknown_action():
 
 @pytest.mark.asyncio
 async def test_tool_result_unknown():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+    async with _client() as client:
         r = await client.post('/agent/tool_result', json={'id': 'bad-id', 'result': 'test'})
     assert r.status_code == 200
     data = r.json()

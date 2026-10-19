@@ -42,6 +42,7 @@ const DEVICE_LINK_TOPIC = `bucks-devicelink-${crypto.createHash("sha256").update
 const DEVICE_STATE_TOPIC = `bucks-devicestate-${crypto.createHash("sha256").update(CLUSTER_SECRET).digest("hex").slice(0, 16)}`;
 
 const AGENT_SERVER_URL = process.env.AGENT_SERVER_URL || "http://localhost:8765";
+const agentAuth = require("./agent-auth");
 const STATE_REANNOUNCE_INTERVAL_MS = 10 * 60_000;
 
 let _ipfs = null; // ipfs-node.js module ref, injected at init()
@@ -75,7 +76,7 @@ function agentPost(urlPath, payload) {
     const url = new URL(urlPath, AGENT_SERVER_URL);
     const req = http.request(
       url,
-      { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) } },
+      { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), ...agentAuth.authHeaders() } },
       (res) => {
         let data = "";
         res.on("data", (d) => (data += d));
@@ -85,7 +86,7 @@ function agentPost(urlPath, payload) {
       },
     );
     req.on("error", reject);
-    req.setTimeout(8000, () => { req.abort(); reject(new Error("timeout")); });
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error("timeout")); });
     req.write(body);
     req.end();
   });

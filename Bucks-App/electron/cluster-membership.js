@@ -41,6 +41,7 @@ const GENESIS_SOUL_IDS = new Set(
 );
 
 const AGENT_SERVER_URL = process.env.AGENT_SERVER_URL || "http://localhost:8765";
+const agentAuth = require("./agent-auth");
 const PRESENCE_TTL_MS = 60_000; // 2x the soul heartbeat interval (30s)
 
 let heliaNode = null;
@@ -79,7 +80,7 @@ function agentPost(urlPath, payload) {
     const url = new URL(urlPath, AGENT_SERVER_URL);
     const req = http.request(
       url,
-      { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) } },
+      { method: "POST", headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body), ...agentAuth.authHeaders() } },
       (res) => {
         let data = "";
         res.on("data", (d) => (data += d));
@@ -89,7 +90,7 @@ function agentPost(urlPath, payload) {
       },
     );
     req.on("error", reject);
-    req.setTimeout(8000, () => { req.abort(); reject(new Error("timeout")); });
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error("timeout")); });
     req.write(body);
     req.end();
   });

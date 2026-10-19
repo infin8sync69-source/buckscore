@@ -12,5 +12,7 @@ contextBridge.exposeInMainWorld('ephemeralAPI', {
   // Set layout mode: 'pill' | 'spotlight' | 'card' | 'dock'
   setMode: (mode) => ipcRenderer.send('ephemeral:set-mode', { mode }),
   // Focus-input event sent when the window is shown via Cmd+K
-  onFocusInput: (callback) => ipcRenderer.on('focus-input', callback)
+  onFocusInput: (callback) => ipcRenderer.on('focus-input', callback),
+  // {baseUrl, token} for calling the Soul Engine; used by agent-client.js
+  getAgentAuth: () => ipcRenderer.invoke('agent:auth'),
 });

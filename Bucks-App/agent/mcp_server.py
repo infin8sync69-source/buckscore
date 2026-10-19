@@ -25,8 +25,8 @@ from contextlib import asynccontextmanager, aclosing
 import httpx
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
 
+import local_auth
 from tools.registry import TOOLS, get_tool
 
 logging.basicConfig(level=logging.INFO)
@@ -41,14 +41,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS for Claude Code and other clients
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# MCP clients authenticate with the shared local agent token
+# (Authorization: Bearer <contents of ~/.bucks/agent.token>); see local_auth.py.
+AGENT_TOKEN = local_auth.protect(app)
 
 
 # ─── MCP Protocol Responses ──────────────────────────────────────────────────
@@ -464,7 +459,8 @@ async def query_soul_engine(request: dict):
                 async with client.stream(
                     "POST",
                     f"{SOUL_ENGINE_URL}/chat",
-                    json=request
+                    json=request,
+                    headers={"Authorization": f"Bearer {AGENT_TOKEN}"},
                 ) as response:
                     async for line in response.aiter_lines():
                         if line:
