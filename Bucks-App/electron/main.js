@@ -53,8 +53,8 @@ app.commandLine.appendSwitch('ignore-gpu-blocklist');
 app.commandLine.appendSwitch('enable-webgl');
 const path = require('path');
 const os   = require('os');
-const { fileURLToPath } = require('url');
 const agentAuth = require('./agent-auth');
+const shellTrust = require('./shell-trust');
 // QNN_PATH env var lets users install the Soul Engine outside ~/Desktop/QNN.
 // Set QNN_PATH=/path/to/qnn in the environment before launching the app.
 const QNN_PATH = process.env.QNN_PATH || path.join(os.homedir(), 'Desktop', 'QNN');
@@ -172,23 +172,8 @@ function saveSettings(settings) {
   }
 }
 
-// The shell pages we ship, as absolute paths. Trust is an exact match on the
-// page's file path (any #private hash or query is ignored). The old check —
-// "a file:// URL containing index.html or bucks-browser, or anything on
-// localhost:3000" — trusted file:///tmp/index.html and any local dev server
-// the shell frame could be navigated to (C-02).
-const SHELL_PAGE = path.join(__dirname, 'index.html');
-const AGENT_CLIENT_PAGES = new Set([SHELL_PAGE, path.join(__dirname, 'ephemeral.html')]);
-
-function isShellPage(rawUrl, pages) {
-  let u;
-  try { u = new URL(rawUrl); } catch (_) { return false; }
-  if (u.protocol !== 'file:') return false;
-  try { return pages.has(path.normalize(fileURLToPath(u))); } catch (_) { return false; }
-}
-
 function isInternalOrigin(sender) {
-  return isShellPage(sender.getURL(), new Set([SHELL_PAGE]));
+  return shellTrust.isShellPage(sender.getURL());
 }
 
 /* ─── Window creation ─── */
@@ -1530,8 +1515,7 @@ app.whenReady().then(async () => {
   // token. Only the top frame of our own shell pages gets it: web tabs have
   // no preload, and an iframe inside the shell is not the shell.
   ipcMain.handle('agent:auth', (event) => {
-    const frame = event.senderFrame;
-    if (!frame || frame.parent !== null || !isShellPage(frame.url, AGENT_CLIENT_PAGES)) return null;
+    if (!shellTrust.isShellSender(event, [shellTrust.SHELL_PAGE, shellTrust.EPHEMERAL_PAGE])) return null;
     return { baseUrl: agentAuth.SOUL_ENGINE_URL, token: agentAuth.getToken() };
   });
 

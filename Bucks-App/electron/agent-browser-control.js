@@ -143,14 +143,25 @@
     return img.toPNG().toString('base64');
   }
 
+  // Schemes the agent may open (C-20). The URL is model-chosen, so it is
+  // untrusted input: "javascript://%0a…" used to pass the old "has a scheme://"
+  // test and ran in the user's tab, and file:// could open local files.
+  const NAV_SCHEMES = new Set(['http:', 'https:', 'ipfs:', 'ipns:', 'bucks:']);
+
   function navigate(wv, url) {
-    if (!wv) throw new Error('No active web tab.');
     let target = String(url || '').trim();
-    if (!/^[a-z]+:\/\//i.test(target) && !target.startsWith('bucks://')) {
-      target = 'https://' + target;
+    // A bare host ("example.com", "localhost:3000") gets https://. Scheme
+    // forms without "//" (javascript:, data:, about:) end up unparseable or
+    // non-http after that prefix and are refused below.
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(target)) target = 'https://' + target;
+    let parsed;
+    try { parsed = new URL(target); } catch (_) { throw new Error(`Not a valid web address: ${url}`); }
+    if (!NAV_SCHEMES.has(parsed.protocol)) {
+      throw new Error(`Refusing to open ${parsed.protocol} URLs — only web, IPFS and bucks:// pages.`);
     }
-    wv.src = target;
-    return { ok: true, url: target };
+    if (!wv) throw new Error('No active web tab.');
+    wv.src = parsed.href;
+    return { ok: true, url: parsed.href };
   }
 
   /* ── workspace (multi-pane) helpers ── */

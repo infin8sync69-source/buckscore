@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const { attachBluetoothChooser } = require('./permission-manager');
 const { spellcheckMenuItems } = require('./web-security');
+const { isShellSender } = require('./shell-trust');
 
 /** tabId -> { view, winId, lastBounds, visible } */
 const tabsById = new Map();
@@ -194,7 +195,20 @@ function destroyTabsForWindow(winId) {
 }
 
 function setupTabIPC() {
-  ipcMain.handle('tabs:create', (e, { tabId, url, partition }) => {
+  // Only the shell page that owns a tab may drive it (C-08). execJS runs
+  // arbitrary code in the page and capture/printToPDF read it, so neither
+  // another window nor a shell frame that has navigated off index.html may
+  // reach them. Refusals reject the renderer's promise rather than no-op.
+  const handle = (channel, fn) => ipcMain.handle(channel, (e, args = {}) => {
+    if (!isShellSender(e)) throw new Error(`${channel}: caller is not the Bucks shell`);
+    const rec = channel === 'tabs:create' ? null : tabsById.get(args.tabId);
+    if (rec && rec.winId !== (_win(e) && _win(e).id)) {
+      throw new Error(`${channel}: tab belongs to another window`);
+    }
+    return fn(e, args);
+  });
+
+  handle('tabs:create', (e, { tabId, url, partition }) => {
     const win = _win(e);
     if (!win || tabsById.has(tabId)) return false;
 
@@ -239,7 +253,7 @@ function setupTabIPC() {
     return true;
   });
 
-  ipcMain.handle('tabs:close', (_e, { tabId }) => {
+  handle('tabs:close', (_e, { tabId }) => {
     const rec = tabsById.get(tabId);
     if (!rec) return false;
     const win = BrowserWindow.fromId(rec.winId);
@@ -249,13 +263,13 @@ function setupTabIPC() {
     return true;
   });
 
-  ipcMain.handle('tabs:navigate', (_e, { tabId, url }) => {
+  handle('tabs:navigate', (_e, { tabId, url }) => {
     const rec = _get(tabId);
     if (rec) rec.view.webContents.loadURL(url).catch(() => {});
     return !!rec;
   });
 
-  ipcMain.handle('tabs:setBounds', (_e, { tabId, bounds }) => {
+  handle('tabs:setBounds', (_e, { tabId, bounds }) => {
     const rec = _get(tabId);
     if (!rec) return false;
     const b = {
@@ -268,7 +282,7 @@ function setupTabIPC() {
     return true;
   });
 
-  ipcMain.handle('tabs:setVisible', (_e, { tabId, visible }) => {
+  handle('tabs:setVisible', (_e, { tabId, visible }) => {
     const rec = _get(tabId);
     if (!rec) return false;
     rec.visible = !!visible;
@@ -283,7 +297,7 @@ function setupTabIPC() {
     return true;
   });
 
-  ipcMain.handle('tabs:setBorderRadius', (_e, { tabId, radius }) => {
+  handle('tabs:setBorderRadius', (_e, { tabId, radius }) => {
     const rec = _get(tabId);
     if (rec && typeof rec.view.setBorderRadius === 'function') {
       try { rec.view.setBorderRadius(radius); } catch (_) {}
@@ -292,25 +306,25 @@ function setupTabIPC() {
     return false;
   });
 
-  ipcMain.handle('tabs:goBack', (_e, { tabId }) => {
+  handle('tabs:goBack', (_e, { tabId }) => {
     const rec = _get(tabId);
     if (rec) {
       const wc = rec.view.webContents;
       wc.navigationHistory ? wc.navigationHistory.goBack() : wc.goBack();
     }
   });
-  ipcMain.handle('tabs:goForward', (_e, { tabId }) => {
+  handle('tabs:goForward', (_e, { tabId }) => {
     const rec = _get(tabId);
     if (rec) {
       const wc = rec.view.webContents;
       wc.navigationHistory ? wc.navigationHistory.goForward() : wc.goForward();
     }
   });
-  ipcMain.handle('tabs:reload', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.reload(); });
-  ipcMain.handle('tabs:stop', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.stop(); });
-  ipcMain.handle('tabs:setZoom', (_e, { tabId, factor }) => { const r = _get(tabId); if (r) r.view.webContents.setZoomFactor(factor); });
-  ipcMain.handle('tabs:print', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.print(); });
-  ipcMain.handle('tabs:openDevTools', (_e, { tabId }) => {
+  handle('tabs:reload', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.reload(); });
+  handle('tabs:stop', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.stop(); });
+  handle('tabs:setZoom', (_e, { tabId, factor }) => { const r = _get(tabId); if (r) r.view.webContents.setZoomFactor(factor); });
+  handle('tabs:print', (_e, { tabId }) => { const r = _get(tabId); if (r) r.view.webContents.print(); });
+  handle('tabs:openDevTools', (_e, { tabId }) => {
     try {
       const settingsFile = path.join(app.getPath('userData'), 'settings.json');
       if (fs.existsSync(settingsFile)) {
@@ -325,22 +339,22 @@ function setupTabIPC() {
     if (r) r.view.webContents.openDevTools({ mode: 'detach' });
   });
 
-  ipcMain.handle('tabs:find', (_e, { tabId, text, options }) => {
+  handle('tabs:find', (_e, { tabId, text, options }) => {
     const rec = _get(tabId);
     if (rec && text) rec.view.webContents.findInPage(text, options || {});
   });
-  ipcMain.handle('tabs:stopFind', (_e, { tabId, action }) => {
+  handle('tabs:stopFind', (_e, { tabId, action }) => {
     const rec = _get(tabId);
     if (rec) rec.view.webContents.stopFindInPage(action || 'clearSelection');
   });
 
-  ipcMain.handle('tabs:execJS', async (_e, { tabId, code, userGesture }) => {
+  handle('tabs:execJS', async (_e, { tabId, code, userGesture }) => {
     const rec = _get(tabId);
     if (!rec) throw new Error('No such tab');
     return rec.view.webContents.executeJavaScript(code, !!userGesture);
   });
 
-  ipcMain.handle('tabs:capture', async (_e, { tabId }) => {
+  handle('tabs:capture', async (_e, { tabId }) => {
     const rec = _get(tabId);
     if (!rec) throw new Error('No such tab');
     const img = await rec.view.webContents.capturePage();
@@ -348,7 +362,7 @@ function setupTabIPC() {
   });
 
   // Print the live page of a tab/pane to a PDF in ~/Documents/Bucks.
-  ipcMain.handle('tabs:printToPDF', async (_e, { tabId, title }) => {
+  handle('tabs:printToPDF', async (_e, { tabId, title }) => {
     const rec = _get(tabId);
     if (!rec) throw new Error('No such tab');
     const { targetPath } = require('./doc-factory');
@@ -361,7 +375,7 @@ function setupTabIPC() {
     return { path: p };
   });
 
-  ipcMain.handle('tabs:getURL', (_e, { tabId }) => {
+  handle('tabs:getURL', (_e, { tabId }) => {
     const rec = _get(tabId);
     return rec ? rec.view.webContents.getURL() : '';
   });
