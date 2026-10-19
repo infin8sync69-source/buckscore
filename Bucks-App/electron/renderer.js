@@ -2623,6 +2623,7 @@
           } catch (e) {
             console.error('[Webview] Studio Reload failed:', e);
           }
+        }
       } else if (viewName === 'ipfs') {
         try { refreshIPFSStatus(); refreshIPFSFeed(); } catch (_) {}
       }
